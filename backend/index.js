@@ -82,9 +82,11 @@ const otpRoutes = require('./routes/otpRoutes');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: 'http://localhost:5173' } });
+const io = new Server(server, {
+  cors: { origin: '*' } // allow all origins for Render
+});
 
-app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(cors());
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
@@ -133,7 +135,7 @@ io.on('connection', (socket) => {
     console.log('User disconnected:', socket.id);
     liveUsers.delete(socket.id);
 
-    // Broadcast updated live users to both live users and admins
+ 
     io.to("live_users").emit("updateLiveUsers", Array.from(liveUsers.values()));
     io.to("admin_room").emit("updateLiveUsers", Array.from(liveUsers.values()));
   });
