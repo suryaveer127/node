@@ -69,10 +69,8 @@
 // server.listen(process.env.PORT || 5000, () => {
 //   console.log('Server running on port', process.env.PORT || 5000);
 // });
-
-
-
 require('dotenv').config();
+const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
 const http = require('http');
@@ -91,6 +89,7 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/otp', otpRoutes);
+
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))
@@ -138,6 +137,11 @@ io.on('connection', (socket) => {
     io.to("live_users").emit("updateLiveUsers", Array.from(liveUsers.values()));
     io.to("admin_room").emit("updateLiveUsers", Array.from(liveUsers.values()));
   });
+});
+app.use(express.static(path.join(__dirname, "../client/build")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/build", "index.html"));
 });
 
 server.listen(process.env.PORT || 5000, () => {
