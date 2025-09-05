@@ -61,7 +61,7 @@ exports.registration = async (req, res) => {
 
     await newUser.save();
 
-    // Delete temp Redis keys (email and mobile)
+    
     await redisClient.del(`tempUser:${email}`);
     await redisClient.del(`tempUserMobile:${userData.mobile}`);
     await redisClient.del(`mobile:${userData.mobile}`);
