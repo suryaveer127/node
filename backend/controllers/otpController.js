@@ -3,6 +3,7 @@ const redisClient = require('../utils/redisClient');
 
 
 exports.sendOtp = async (req, res) => {
+ 
   try {
     const { contact, type } = req.body; 
     if (!contact || !['mobile', 'email'].includes(type)) {
@@ -11,8 +12,10 @@ exports.sendOtp = async (req, res) => {
 
     const otp = otpGenerator.generate(6, { digits: true, alphabets: false, upperCase: false, specialChars: false });
     await redisClient.setEx(`${type}:${contact}`, 600, otp);
+   
     console.log(`OTP for ${type} (${contact}):`, otp);
-    res.json({ message: `OTP sent to your ${type}` });
+    res.json({ message: `OTP sent to your ${type}`, otp });
+
   } catch (err) {
     console.error('OTP send error:', err);
     res.status(500).json({ error: 'Server error' });

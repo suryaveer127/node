@@ -21,6 +21,8 @@ const Signup = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [otpEmail, setOtpEmail] = useState('');
   const [otpMobile, setOtpMobile] = useState('');
+  const [generatedOtpEmail, setGeneratedOtpEmail] = useState('');
+  const [generatedOtpMobile, setGeneratedOtpMobile] = useState('');
   const [verifiedEmail, setVerifiedEmail] = useState(false);
   const [verifiedMobile, setVerifiedMobile] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -28,7 +30,6 @@ const Signup = () => {
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  // Simple validation (expand as needed)
   const validate = () => {
     if (!formData.firstName.trim()) return 'First name is required';
     if (!formData.lastName.trim()) return 'Last name is required';
@@ -43,15 +44,6 @@ const Signup = () => {
     return '';
   };
 
-  const resetOtpAndVerification = () => {
-    setOtpSent(false);
-    setOtpEmail('');
-    setOtpMobile('');
-    setVerifiedEmail(false);
-    setVerifiedMobile(false);
-  };
-
-  // Step 1: Save temporary user in Redis
   const saveTempUser = async () => {
     setLoading(true);
     setError('');
@@ -62,12 +54,9 @@ const Signup = () => {
         body: JSON.stringify(formData),
       });
       const data = await response.json();
-      if (response.ok) {
-        return true;
-      } else {
-        setError(data.error || 'Failed to save temporary user');
-        return false;
-      }
+      if (response.ok) return true;
+      setError(data.error || 'Failed to save temporary user');
+      return false;
     } catch {
       setError('Server error saving temporary user');
       return false;
@@ -76,7 +65,6 @@ const Signup = () => {
     }
   };
 
-  // Step 2: Send OTPs to email and mobile after saving temp user
   const sendOtp = async () => {
     const validationError = validate();
     if (validationError) {
@@ -101,8 +89,17 @@ const Signup = () => {
           body: JSON.stringify({ contact: formData.mobile, type: 'mobile' }),
         }),
       ]);
+      const emailData = await emailRes.json();
+      const mobileData = await mobileRes.json();
+
       if (emailRes.ok && mobileRes.ok) {
+        setGeneratedOtpEmail(emailData.otp || '');
+        setGeneratedOtpMobile(mobileData.otp || '');
         setOtpSent(true);
+
+       
+        console.log('Generated Email OTP:', emailData.otp);
+        console.log('Generated Mobile OTP:', mobileData.otp);
       } else {
         setError('Failed to send OTPs');
       }
@@ -113,7 +110,6 @@ const Signup = () => {
     }
   };
 
- 
   const verifyOtp = async (type) => {
     setLoading(true);
     setError('');
@@ -128,12 +124,7 @@ const Signup = () => {
       if (response.ok) {
         type === 'email' ? setVerifiedEmail(true) : setVerifiedMobile(true);
       } else {
-        if (data.error && data.error.toLowerCase().includes('temporary user data')) {
-          setError('Your session expired or temporary data missing. Please restart registration.');
-          resetOtpAndVerification();
-        } else {
-          setError(data.error || `Failed to verify ${type} OTP`);
-        }
+        setError(data.error || `Failed to verify ${type} OTP`);
       }
     } catch {
       setError('Server error verifying OTP');
@@ -142,71 +133,61 @@ const Signup = () => {
     }
   };
 
-const finalizeRegistration = async () => {
-  if (!verifiedEmail || !verifiedMobile) {
-    setError('Please verify both email and mobile OTPs');
-    return;
-  }
-  setLoading(true);
-  setError('');
-  try {
-    const response = await fetch(`${apiBaseUrl}/auth/register-final`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: formData.email }),
-    });
-    const data = await response.json();
-    if (response.ok) {
-      alert('Registration successful');
-      navigate('/login');
-    } else {
-      if (data.error && (data.error.toLowerCase().includes('exists') || data.error.toLowerCase().includes('duplicate'))) {
-        alert('User with this email/mobile/login ID already exists. Please use different credentials or login.');
-      } else if (data.error && data.error.toLowerCase().includes('temporary user data')) {
-        setError('Your session expired or temporary data missing. Please restart registration.');
-        resetOtpAndVerification();
+  const finalizeRegistration = async () => {
+    if (!verifiedEmail || !verifiedMobile) {
+      setError('Please verify both email and mobile OTPs');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      const response = await fetch(`${apiBaseUrl}/auth/register-final`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        alert('Registration successful');
+        navigate('/login');
       } else {
         setError(data.error || 'Registration failed');
       }
+    } catch {
+      setError('Server error during finalization');
+    } finally {
+      setLoading(false);
     }
-  } catch {
-    setError('Server error during finalization');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const bothVerified = verifiedEmail && verifiedMobile;
 
   return (
-    <div class="form-container">
+    <div className="form-container">
       <h2>Sign Up</h2>
       {error && <p style={{ color: 'red' }}>{error}</p>}
 
-     
-      <input className='form-input' name="firstName" placeholder="First Name" value={formData.firstName} onChange={handleChange} disabled={otpSent} />
+      <input name="firstName" placeholder="First Name" value={formData.firstName} onChange={handleChange} disabled={otpSent} />
       <input name="lastName" placeholder="Last Name" value={formData.lastName} onChange={handleChange} disabled={otpSent} />
 
-    
-      <input className='form-input' name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} disabled={otpSent} />
+      <input name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} disabled={otpSent} />
       <input name="mobile" placeholder="Mobile" value={formData.mobile} onChange={handleChange} disabled={otpSent} />
 
-    
-      <input className='form-input'  name="street" placeholder="Street" value={formData.street} onChange={handleChange} disabled={otpSent} />
-      <input className='form-input' name="city" placeholder="City" value={formData.city} onChange={handleChange} disabled={otpSent} />
-      <input className='form-input' name="state" placeholder="State" value={formData.state} onChange={handleChange} disabled={otpSent} />
-      <input className='form-input' name="country" placeholder="Country" value={formData.country} onChange={handleChange} disabled={otpSent} />
+      <input name="street" placeholder="Street" value={formData.street} onChange={handleChange} disabled={otpSent} />
+      <input name="city" placeholder="City" value={formData.city} onChange={handleChange} disabled={otpSent} />
+      <input name="state" placeholder="State" value={formData.state} onChange={handleChange} disabled={otpSent} />
+      <input name="country" placeholder="Country" value={formData.country} onChange={handleChange} disabled={otpSent} />
 
-   
       <input name="loginId" placeholder="Login ID" value={formData.loginId} onChange={handleChange} disabled={otpSent} />
       <input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleChange} disabled={otpSent} />
 
       {!otpSent ? (
         <button onClick={sendOtp} disabled={loading}>
-          {loading ? 'Sending OTPs...' : 'Send OTPs'}
+          {loading ? 'Sending OTP...' : 'Send OTP'}
         </button>
       ) : (
         <div>
+          <p>Please note the OTPs below and enter them to verify:</p>
           <div>
             <input
               placeholder="Email OTP"
@@ -217,6 +198,7 @@ const finalizeRegistration = async () => {
             <button onClick={() => verifyOtp('email')} disabled={verifiedEmail || loading || !otpEmail.trim()}>
               {verifiedEmail ? 'Verified' : 'Verify Email OTP'}
             </button>
+            {generatedOtpEmail && <p style={{ color: 'blue' }}>Generated OTP: {generatedOtpEmail}</p>}
           </div>
           <div>
             <input
@@ -228,22 +210,23 @@ const finalizeRegistration = async () => {
             <button onClick={() => verifyOtp('mobile')} disabled={verifiedMobile || loading || !otpMobile.trim()}>
               {verifiedMobile ? 'Verified' : 'Verify Mobile OTP'}
             </button>
+            {generatedOtpMobile && <p style={{ color: 'blue' }}>Generated OTP: {generatedOtpMobile}</p>}
           </div>
 
           {bothVerified && (
             <button onClick={finalizeRegistration} disabled={loading}>
-              {loading ? 'Registering...' : 'Final Registration'}
+              {loading ? 'Registering...' : ' Register'}
             </button>
           )}
-          
         </div>
       )}
+
       <div className="form-footer">
-       
-        <a className="form-link" href="/login">Login</a>
+         Already have an account? 
+         <a href="/login">Login</a>
       </div>
       <div>
-        <a className=''href="/admin">Admin</a>
+        <a href="/admin">Admin</a>
       </div>
     </div>
   );

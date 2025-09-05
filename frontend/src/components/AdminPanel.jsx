@@ -8,7 +8,6 @@ const AdminPanel = () => {
   const [popupUser, setPopupUser] = useState(null);
   const socketRef = useRef(null);
 
-  // Fetch all users on mount
   useEffect(() => {
     fetch(`${apiBaseUrl}/auth/users`)
       .then(res => res.json())
@@ -20,7 +19,6 @@ const AdminPanel = () => {
 
   useEffect(() => {
     const socket = io('http://localhost:5000');
-
     socketRef.current = socket;
 
     socket.on('connect', () => {
@@ -67,19 +65,10 @@ const AdminPanel = () => {
   const closePopup = () => setPopupUser(null);
 
   return (
-    <div
-      className="userlist-container"
-      style={{ maxWidth: 700, margin: '30px auto', fontFamily: 'Segoe UI, Arial, sans-serif' }}
-    >
+    <div className="userlist-container">
       <h2>Admin Panel - Users Status</h2>
 
-      <table
-        className="userlist-table"
-        border="1"
-        cellPadding="5"
-        cellSpacing="0"
-        style={{ width: '100%', borderCollapse: 'collapse' }}
-      >
+      <table className="userlist-table">
         <thead>
           <tr>
             <th>Name</th><th>Email</th><th>Status</th><th>Socket ID</th>
@@ -87,14 +76,14 @@ const AdminPanel = () => {
         </thead>
         <tbody>
           {allUsers.length === 0 ? (
-            <tr><td colSpan="4" style={{ textAlign: 'center' }}>No users registered</td></tr>
+            <tr><td colSpan="4" className="no-users">No users registered</td></tr>
           ) : allUsers.map(user => {
               const online = isUserLive(user.email);
               return (
-                <tr key={user._id} onClick={() => handleUserClick(user)} style={{ cursor: 'pointer' }}>
+                <tr key={user._id} onClick={() => handleUserClick(user)} className="user-row">
                   <td>{user.firstName} {user.lastName}</td>
                   <td>{user.email}</td>
-                  <td style={{ color: online ? 'green' : 'red', fontWeight: 'bold' }}>
+                  <td className={online ? 'status-online' : 'status-offline'}>
                     {online ? 'Online' : 'Offline'}
                   </td>
                   <td>{getSocketId(user.email)}</td>
@@ -105,20 +94,8 @@ const AdminPanel = () => {
       </table>
 
       {popupUser && (
-        <div
-          onClick={closePopup}
-          style={{
-            position: 'fixed',
-            top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0,0,0,0.5)',
-            display: 'flex', justifyContent: 'center', alignItems: 'center',
-            zIndex: 1000,
-          }}
-        >
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{ background: '#fff', padding: 20, borderRadius: 12, maxWidth: 400, width: '90%' }}
-          >
+        <div className="popup-overlay" onClick={closePopup}>
+          <div className="popup-content" onClick={e => e.stopPropagation()}>
             <h3>User Info</h3>
             <p><b>Name:</b> {popupUser.firstName} {popupUser.lastName}</p>
             <p><b>Email:</b> {popupUser.email}</p>
@@ -127,7 +104,7 @@ const AdminPanel = () => {
             <p><b>Login ID:</b> {popupUser.loginId}</p>
             <p><b>Socket ID:</b> {popupUser.socketId}</p>
             <p><b>Created At:</b> {popupUser.creationTime ? new Date(popupUser.creationTime).toLocaleString() : ''}</p>
-            <button style={{ marginTop: 12, padding: '8px 14px', borderRadius: 6, cursor: 'pointer' }} onClick={closePopup}>Close</button>
+            <button className="popup-close-btn" onClick={closePopup}>Close</button>
           </div>
         </div>
       )}

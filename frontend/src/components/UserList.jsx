@@ -9,7 +9,6 @@ const UserList = () => {
   const [popupUser, setPopupUser] = useState(null);
   const socketRef = useRef(null);
 
-  // Load currentUser from localStorage once on mount
   useEffect(() => {
     const storedUser = localStorage.getItem('currentUser');
     if (storedUser && storedUser !== 'undefined') {
@@ -22,7 +21,6 @@ const UserList = () => {
     }
   }, []);
 
-
   useEffect(() => {
     fetch(`${apiBaseUrl}/auth/users`)
       .then(res => res.json())
@@ -32,11 +30,10 @@ const UserList = () => {
       .catch(console.error);
   }, [apiBaseUrl]);
 
-
   useEffect(() => {
     if (!currentUser) return;
 
-    setLiveUsers([]); 
+    setLiveUsers([]);
 
     const socket = io('http://localhost:5000');
     socketRef.current = socket;
@@ -79,21 +76,12 @@ const UserList = () => {
   const isUserLive = email =>
     liveUsers.some(lu => lu && emailMatch(lu.email, email));
 
-  const getSocketId = email => {
-    const lu = liveUsers.find(lu => lu && emailMatch(lu.email, email));
-    return lu ? lu.socketId : 'N/A';
-  };
-
   const handleUserClick = user => {
-    setPopupUser({
-      ...user,
-      socketId: getSocketId(user.email),
-    });
+    setPopupUser(user);
   };
 
   const closePopup = () => setPopupUser(null);
 
-  // Logout handler
   const handleLogout = () => {
     if (socketRef.current && currentUser) {
       socketRef.current.emit('logoutUser', { email: currentUser.email });
@@ -105,37 +93,38 @@ const UserList = () => {
 
   if (!currentUser) {
     return (
-      <div style={{ marginTop: '20%', textAlign: 'center' }}>
+      <div className="logout-message">
         User is logged out. Please login again.
       </div>
     );
   }
 
   return (
-    <div className="userlist-container" style={{ maxWidth: 700, margin: '30px auto', fontFamily: 'Segoe UI, Arial, sans-serif' }}>
-      <h2>User List</h2>
+    <div className="userlist-container">
+      <h2 className="userlist-title">User List</h2>
 
-      <button onClick={handleLogout} style={{ marginBottom: 20, padding: '8px 16px', cursor: 'pointer' }}>
+      <button className="logout-btn" onClick={handleLogout}>
         Logout
       </button>
 
-      <table className="userlist-table" border="1" cellPadding="5" cellSpacing="0" style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <table className="userlist-table">
         <thead>
           <tr>
-            <th>Name</th><th>Email</th><th>Status</th><th>Socket ID</th>
+            <th>Name</th><th>Email</th><th>Status</th>
           </tr>
         </thead>
         <tbody>
           {allUsers.length === 0 ? (
-            <tr><td colSpan="4" style={{ textAlign: 'center' }}>No users registered</td></tr>
+            <tr><td colSpan="3" className="no-users">No users registered</td></tr>
           ) : allUsers.map(user => {
               const online = isUserLive(user.email);
               return (
-                <tr key={user._id} onClick={() => handleUserClick(user)} style={{ cursor: 'pointer' }}>
+                <tr key={user._id} onClick={() => handleUserClick(user)} className="user-row">
                   <td>{user.firstName} {user.lastName}</td>
                   <td>{user.email}</td>
-                  <td style={{ color: online ? 'green' : 'red', fontWeight: 'bold' }}>{online ? 'Online' : 'Offline'}</td>
-                  <td>{getSocketId(user.email)}</td>
+                  <td className={online ? 'status-online' : 'status-offline'}>
+                    {online ? 'Online' : 'Offline'}
+                  </td>
                 </tr>
               );
             })}
@@ -143,22 +132,16 @@ const UserList = () => {
       </table>
 
       {popupUser && (
-        <div onClick={closePopup} style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.5)',
-          display: 'flex', justifyContent: 'center', alignItems: 'center',
-          zIndex: 1000,
-        }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: '#fff', padding: 20, borderRadius: 12, maxWidth: 400, width: '90%' }}>
+        <div className="popup-overlay" onClick={closePopup}>
+          <div className="popup-content" onClick={e => e.stopPropagation()}>
             <h3>User Info</h3>
             <p><b>Name:</b> {popupUser.firstName} {popupUser.lastName}</p>
             <p><b>Email:</b> {popupUser.email}</p>
             <p><b>Mobile:</b> {popupUser.mobile}</p>
             <p><b>Address:</b> {popupUser.address?.street}, {popupUser.address?.city}, {popupUser.address?.state}, {popupUser.address?.country}</p>
             <p><b>Login ID:</b> {popupUser.loginId}</p>
-            <p><b>Socket ID:</b> {popupUser.socketId}</p>
             <p><b>Created At:</b> {popupUser.creationTime ? new Date(popupUser.creationTime).toLocaleString() : ''}</p>
-            <button style={{ marginTop: 12, padding: '8px 14px', borderRadius: 6, cursor: 'pointer' }} onClick={closePopup}>Close</button>
+            <button className="popup-close-btn" onClick={closePopup}>Close</button>
           </div>
         </div>
       )}

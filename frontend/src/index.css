@@ -1,165 +1,225 @@
- body {
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: rgb(245, 236, 236);
-      height: 100vh;
-      margin: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: #333;
-    }
-    .form-container {
-        background: #fff;
-      padding: 40px 30px;
-      border-radius: 12px;
-      width: 360px;
-      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
-      text-align: center;
-    }
-    h2 { margin: 0 0 30px 0;
-      font-weight: 700;
-      color: #4e54c8;
-      letter-spacing: 1.3px;}
-    input {
-     width: 100%;
+
+body {
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: rgb(245, 236, 236);
+    margin: 0;
+    padding: 0;
+    color: #333;
+    display:flex;
+}
+
+
+.form-container {
+  background: #fff;
+  padding: 40px 30px;
+  border-radius: 12px;
+  width: 360px;
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  transition: box-shadow 0.3s ease;
+}
+
+.form-container:hover {
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+
+h2 {
+  margin: 0 0 30px 0;
+  font-weight: 700;
+  color: #4e54c8;
+  letter-spacing: 1.3px;
+  font-size: 2rem;
+}
+
+
+input {
+width: 100%;
       padding: 5px 5px;
       margin-bottom: 10px;
       border: 1.8px solid #ccc;
       border-radius: 10px;
       font-size: 1rem;
       transition: border-color 0.3s ease;
-    }
-    button {
-       display: inline-block;
-      background-color: #4e54c8;
-      border: none;
-      border-radius: 8px;
-      padding: 14px 0;
-      width: 100%;
-      color: white;
-      font-weight: 600;
-      font-size: 1.1rem;
-      letter-spacing: 1px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    button:hover { background: #0056b3; }
-    .links {  font-size: 0.9rem;
-      color: #555;}
-    .links a {   color: #4e54c8;
-      text-decoration: none;
-      font-weight: 600;
-      margin-left: 6px;
-      transition: color 0.3s ease; }
-    .error { color: red; font-size: 14px; min-height: 18px; text-align:center; }
+}
+
+input:focus {
+  border-color: #4e54c8;
+  box-shadow: 0 0 5px rgba(78, 84, 200, 0.5);
+}
+
+
+button {
+  display: inline-block;
+  background-color: #4e54c8;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 0;
+  width: 100%;
+  color: white;
+  font-weight: 600;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+button:disabled {
+  background-color: #a2a0d9;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+button:hover:not(:disabled) {
+  background-color: #3b40a0;
+  box-shadow: 0 4px 8px rgba(58, 63, 160, 0.6);
+}
+
+
+.links {
+  font-size: 0.9rem;
+  color: #555;
+  user-select: none;
+}
+
+.links a {
+  color: #4e54c8;
+  text-decoration: none;
+  font-weight: 600;
+  margin-left: 6px;
+  transition: color 0.3s ease;
+}
+
+.links a:hover {
+  color: #3b40a0;
+}
+
+
+.error {
+  color: #d93025;
+  font-size: 14px;
+  min-height: 18px;
+  margin: 10px 0;
+  text-align: center;
+  font-weight: 600;
+}
 
 
 table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 16px;
-  }
-
-  th, td {
-    padding: 12px 14px;
-    text-align: left;
-    border-bottom: 1px solid #e6e6e6;
-  }
-
-  th {
-    background: #f0f4f8;
-    color: #286090;
-    font-weight: 600;
-  }
-
-.live-status {
-  font-size: 18px;
-}
-.userlist-container {
-  max-width: 700px;
-  margin: 30px auto;
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
   font-family: 'Segoe UI', Arial, sans-serif;
-  background: #fff;
+}
+
+th, td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e6e6e6;
+  font-size: 1rem;
+  vertical-align: middle;
+  user-select: none;
+}
+
+th {
+  background-color: #f0f4f8;
+  color: #286090;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+
+.userlist-container {
+ width: 90%;
+    max-width: 1100px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    padding: 30px 36px;
 }
 
 .userlist-title {
   text-align: center;
-  color: #594ae2;
-  font-size: 2rem;
-  margin-bottom: 25px;
-  letter-spacing: 1px;
+  color: #484bf7;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  font-size: 2.25rem;
+  user-select: none;
 }
+
 
 .userlist-table {
   width: 100%;
   border-collapse: collapse;
-  background: #f8f8fb;
-  box-shadow: 0 0 10px rgba(0,0,0,0.06);
+  background: transparent;
+  cursor: default;
 }
 
-.userlist-table th, .userlist-table td {
-  border: 1px solid #d1d1dd;
-  padding: 8px 12px;
-  text-align: left;
+.userlist-table tr {
+  transition: background-color 0.15s ease;
 }
 
-.userlist-table th {
-  background: #eaeaf9;
-  color: #2d2a6b;
-  font-weight: 500;
+.userlist-table tr:hover {
+  background-color: #f8f8fc;
 }
 
-.userlist-empty td {
+.status-online {
+  color: #279c48;
+  font-weight: 700;
+}
+
+.status-offline {
+  color: #b54c30;
+  font-weight: 700;
+}
+
+
+.no-users {
   text-align: center;
-  color: #9a9ab3;
-  background: #fcf8f4;
+  color: #aa706c;
+  font-style: italic;
+  font-weight: 600;
+  padding: 1rem 0;
 }
 
-.user-row {
-  cursor: pointer;
-}
 
-.userlist-online {
-  color: green;
-  font-weight: bold;
-}
-
-.userlist-offline {
-  color: red;
-  font-weight: bold;
-}
-
-.userlist-popup-overlay {
+.popup-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.5);
-  z-index: 1000;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
+  user-select: none;
 }
 
-.userlist-popup-content {
+
+.popup-content {
   background: #fff;
-  padding: 20px;
-  border-radius: 12px;
-  max-width: 400px;
+  padding: 24px 28px;
+  border-radius: 14px;
+  max-width: 420px;
   width: 90%;
-  box-shadow: 0 2px 16px rgba(70,44,220,0.18);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  user-select: text;
 }
 
-.userlist-popup-content h3 {
-  margin-top: 0;
-  color: #594ae2;
-}
 
-.userlist-close-btn {
-  margin-top: 12px;
-  padding: 8px 14px;
-  border-radius: 6px;
+.popup-close-btn {
+  margin-top: 18px;
+  padding: 10px 16px;
+  border-radius: 8px;
   cursor: pointer;
-  background: #594ae2;
-  color: #fff;
   border: none;
+  background-color: #007bff;
+  color: white;
+  font-weight: 700;
   font-size: 1rem;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.popup-close-btn:hover {
+  background-color: #0056b3;
+  box-shadow: 0 4px 12px rgba(0, 83, 179, 0.7);
 }
