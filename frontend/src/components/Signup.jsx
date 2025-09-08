@@ -40,7 +40,7 @@ const Signup = () => {
     if (!formData.state.trim()) return 'State is required';
     if (!formData.country.trim()) return 'Country is required';
     if (!formData.loginId.match(/^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{8}$/)) return 'Login ID must be 8 chars with letters and digits';
-    if (!formData.password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{6,}$/)) return 'Password must include uppercase, lowercase, special char, min 6';
+    if (!formData.password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{6,}$/)) return 'Password must be 6 chars with 1 uppercase, 1 lowercase & 1 special char.';
     return '';
   };
 
