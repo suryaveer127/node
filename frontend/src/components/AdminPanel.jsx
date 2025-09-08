@@ -2,7 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import { io } from 'socket.io-client';
 
 const AdminPanel = () => {
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+ const socketUrl=import.meta.env.VITE_SOCKET_URL
   const [allUsers, setAllUsers] = useState([]);
   const [liveUsers, setLiveUsers] = useState([]);
   const [popupUser, setPopupUser] = useState(null);
@@ -18,7 +19,7 @@ const AdminPanel = () => {
   }, [apiBaseUrl]);
 
   useEffect(() => {
-    const socket = io('http://localhost:5000');
+    const socket = io(`${socketUrl}`);
     socketRef.current = socket;
 
     socket.on('connect', () => {

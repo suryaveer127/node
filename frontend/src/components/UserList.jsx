@@ -3,6 +3,7 @@ import { io } from 'socket.io-client';
 
 const UserList = () => {
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+  const socketUrl=import.meta.env.VITE_SOCKET_URL
   const [currentUser, setCurrentUser] = useState(null);
   const [allUsers, setAllUsers] = useState([]);
   const [liveUsers, setLiveUsers] = useState([]);
@@ -35,7 +36,7 @@ const UserList = () => {
 
     setLiveUsers([]);
 
-    const socket = io('http://localhost:5000');
+    const socket = io(`${socketUrl}`);
     socketRef.current = socket;
 
     socket.on('connect', () => {
