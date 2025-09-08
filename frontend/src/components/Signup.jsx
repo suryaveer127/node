@@ -187,7 +187,7 @@ const Signup = () => {
         </button>
       ) : (
         <div>
-          <p>Please note the OTPs below and enter them to verify:</p>
+          
           <div>
             <input
               placeholder="Email OTP"
