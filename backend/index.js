@@ -77,7 +77,7 @@ const http = require('http');
 const cors = require('cors');
 const path=require('path');
 const { Server } = require('socket.io');
-const _dirname=path.resolve();
+
 
 const authRoutes = require('./routes/authRoutes');
 const otpRoutes = require('./routes/otpRoutes');

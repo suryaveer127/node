@@ -2,8 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import { io } from 'socket.io-client';
 
 const UserList = () => {
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-  const socketUrl=import.meta.env.VITE_SOCKET_URL
+  
+  
   const [currentUser, setCurrentUser] = useState(null);
   const [allUsers, setAllUsers] = useState([]);
   const [liveUsers, setLiveUsers] = useState([]);
@@ -23,20 +23,20 @@ const UserList = () => {
   }, []);
 
   useEffect(() => {
-    fetch(`${apiBaseUrl}/auth/users`)
+    fetch(`https://not-4adl.onrender.com/api/auth/users`)
       .then(res => res.json())
       .then(data => {
         setAllUsers(Array.isArray(data) ? data : []);
       })
       .catch(console.error);
-  }, [apiBaseUrl]);
+  }, []);
 
   useEffect(() => {
     if (!currentUser) return;
 
     setLiveUsers([]);
 
-    const socket = io(`${socketUrl}`);
+    const socket = io(`https://not-4adl.onrender.com`);
     socketRef.current = socket;
 
     socket.on('connect', () => {

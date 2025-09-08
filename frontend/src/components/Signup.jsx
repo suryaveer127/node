@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 const Signup = () => {
   const navigate = useNavigate();
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -48,7 +48,7 @@ const Signup = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch(`${apiBaseUrl}/auth/register-temp`, {
+      const response = await fetch(`https://not-4adl.onrender.com/api/auth/register-temp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -78,12 +78,12 @@ const Signup = () => {
     setError('');
     try {
       const [emailRes, mobileRes] = await Promise.all([
-        fetch(`${apiBaseUrl}/otp/send`, {
+        fetch(`https://not-4adl.onrender.com/api/otp/send`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ contact: formData.email, type: 'email' }),
         }),
-        fetch(`${apiBaseUrl}/otp/send`, {
+        fetch(`https://not-4adl.onrender.com/api/otp/send`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ contact: formData.mobile, type: 'mobile' }),
@@ -115,7 +115,7 @@ const Signup = () => {
     setError('');
     const otpValue = type === 'email' ? otpEmail : otpMobile;
     try {
-      const response = await fetch(`${apiBaseUrl}/otp/verify`, {
+      const response = await fetch(`https://not-4adl.onrender.com/api/otp/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ contact: type === 'email' ? formData.email : formData.mobile, otp: otpValue, type }),
@@ -141,7 +141,7 @@ const Signup = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch(`${apiBaseUrl}/auth/register-final`, {
+      const response = await fetch(`https://not-4adl.onrender.com/api/auth/register-final`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email }),

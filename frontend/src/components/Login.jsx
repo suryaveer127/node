@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const navigate = useNavigate();
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+ 
 
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
@@ -29,7 +29,7 @@ const Login = () => {
     setError('');
    console.log('Sending login data:', formData);
     try {
-      const response = await fetch(`${apiBaseUrl}/auth/login`, {
+      const response = await fetch(`https://not-4adl.onrender.com/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
