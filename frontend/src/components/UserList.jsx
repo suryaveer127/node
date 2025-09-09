@@ -112,11 +112,11 @@ const UserList = () => {
 };
 
   return (
-    <div>
-      <h2>User List</h2>
+        <div className="userlist-container">
+      <h2 className="userlist-title">User List</h2>
       <button onClick={handleLogout}>Logout</button>
 
-      <table>
+      <table className="userlist-table">
         <thead>
           <tr>
             <th>Name</th><th>Email</th><th>Status</th>
@@ -127,7 +127,7 @@ const UserList = () => {
 <tr key={user.email} onClick={() => handleUserClick(user)} className="user-row">
               <td>{getUserName(user)}</td>
               <td>{user.email}</td>
-              <td>{isUserLive(user.email) ? "Online" : "Offline"}</td>
+              <td className={online ? 'status-online' : 'status-offline'}>{isUserLive(user.email) ? "Online" : "Offline"}</td>
             </tr>
           ))}
         </tbody>
