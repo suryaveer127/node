@@ -179,12 +179,14 @@ const UserList = () => {
     });
 
     // New registration
-    socket.on("userRegistered", (newUser) => {
+        socket.on("userRegistered", (newUser) => {
       setAllUsers((prev) => {
-        if (!prev.some((u) => u._id === newUser._id)) return [...prev, newUser];
-        return prev;
+        const exists = prev.some((u) => u._id === newUser._id);
+        if (!exists) return [...prev, newUser];
+        return prev.map((u) => (u._id === newUser._id ? { ...u, ...newUser } : u));
       });
     });
+
 
     // User logged in
     socket.on("userLoggedIn", (user) => {
@@ -194,8 +196,12 @@ const UserList = () => {
     return prev.map((u) => (u._id === user._id ? { ...u, ...user } : u));
   });
 
-  
-});
+    setLiveUsers((prev) => {
+        const exists = prev.some((u) => u._id === user._id);
+        if (!exists) return [...prev, user];
+        return prev.map((u) => (u._id === user._id ? { ...u, ...user } : u));
+      });
+    });
 
 
     // User logged out
@@ -218,7 +224,13 @@ const UserList = () => {
   };
 
   if (!currentUser) return <div>User logged out</div>;
-
+  const getUserName = (user) => {
+    if (user.name) return user.name;
+    if (user.firstName || user.lastName) {
+      return `${user.firstName || ""} ${user.lastName || ""}`.trim();
+    }
+    return "Unknown User";
+  };
   return (
     <div>
       <h2>User List</h2>
@@ -233,7 +245,7 @@ const UserList = () => {
         <tbody>
           {allUsers.map((user) => (
             <tr key={user._id}>
-              <td>{user.name || `${user.firstName} ${user.lastName}`}</td>
+              <td>{getUserName(user)}</td>
               <td>{user.email}</td>
               <td>{isUserLive(user.email) ? "Online" : "Offline"}</td>
             </tr>
