@@ -38,6 +38,18 @@ const AdminPanel = () => {
     socket.on('userLogout', (userEmail) => {
       setLiveUsers(prev => prev.filter(u => u.email !== userEmail));
     });
+        socket.on('userRegistered', (newUser) => {
+      setAllUsers((prev) => [...prev, newUser]);
+    });
+
+    
+    socket.on('userLoggedIn', (loggedInUser) => {
+      setLiveUsers((prev) => {
+        const exists = prev.find(u => u.email === loggedInUser.email);
+        if (exists) return prev;
+        return [...prev, loggedInUser];
+      });
+    });
 
     return () => {
       socket.disconnect();

@@ -66,6 +66,18 @@ exports.registration = async (req, res) => {
     await redisClient.del(`tempUserMobile:${userData.mobile}`);
     await redisClient.del(`mobile:${userData.mobile}`);
     await redisClient.del(`email:${email}`);
+    if (req.io) {
+      req.io.emit("userRegistered", {
+        _id: newUser._id,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        email: newUser.email,
+        mobile: newUser.mobile,
+        loginId: newUser.loginId,
+        address: newUser.address,
+        creationTime: newUser.createdAt,
+      });
+    }
 
     res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
@@ -87,6 +99,12 @@ exports.login = async (req, res) => {
 
     if (!isMatch) {
       return res.status(400).json({ error: 'Invalid Email or Password' });
+    }
+      if (req.io) {
+      req.io.emit("userLoggedIn", {
+        email: user.email,
+        name: `${user.firstName} ${user.lastName}`,
+      });
     }
     res.json({
       id: user._id,

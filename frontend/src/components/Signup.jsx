@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
 
-
 const Signup = () => {
-  
-
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -20,7 +17,6 @@ const Signup = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [otpEmail, setOtpEmail] = useState('');
   const [otpMobile, setOtpMobile] = useState('');
-   const [generatedOtpEmail, setGeneratedOtpEmail] = useState('');
   const [generatedOtpMobile, setGeneratedOtpMobile] = useState('');
   const [verifiedEmail, setVerifiedEmail] = useState(false);
   const [verifiedMobile, setVerifiedMobile] = useState(false);
@@ -39,8 +35,10 @@ const Signup = () => {
     if (!formData.city.trim()) return 'City is required';
     if (!formData.state.trim()) return 'State is required';
     if (!formData.country.trim()) return 'Country is required';
-    if (!formData.loginId.match(/^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{8}$/)) return 'Login ID must be 8 chars with letters and digits';
-    if (!formData.password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{6,}$/)) return 'Password must be 6 chars with 1 uppercase, 1 lowercase & 1 special char.';
+    if (!formData.loginId.match(/^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{8}$/)) 
+      return 'Login ID must be 8 chars with letters and digits';
+    if (!formData.password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{6,}$/)) 
+      return 'Password must be 6 chars with 1 uppercase, 1 lowercase & 1 special char.';
     return '';
   };
 
@@ -89,20 +87,12 @@ const Signup = () => {
           body: JSON.stringify({ contact: formData.mobile, type: 'mobile' }),
         }),
       ]);
-      
-     const emailData = await emailRes.json();
+      const emailData = await emailRes.json();
       const mobileData = await mobileRes.json();
 
-      if (mobileRes.ok) {
-        
-        setGeneratedOtpEmail(emailData.otp || '');
+      if (emailRes.ok && mobileRes.ok) {
         setGeneratedOtpMobile(mobileData.otp || '');
-        
         setOtpSent(true);
-
-       
-       
-        console.log('Generated Mobile OTP:', mobileData.otp);
       } else {
         setError('Failed to send OTPs');
       }
@@ -121,7 +111,11 @@ const Signup = () => {
       const response = await fetch(`https://not-4adl.onrender.com/api/otp/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contact: type === 'email' ? formData.email : formData.mobile, otp: otpValue, type }),
+        body: JSON.stringify({ 
+          contact: type === 'email' ? formData.email : formData.mobile, 
+          otp: otpValue, 
+          type 
+        }),
       });
       const data = await response.json();
       if (response.ok) {
@@ -151,7 +145,27 @@ const Signup = () => {
       });
       const data = await response.json();
       if (response.ok) {
-       setSuccessMessage('Registration successful!Please Login');
+        setSuccessMessage('Registration successful! Please Login');
+
+        // ✅ clear form & OTP states after success
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          mobile: '',
+          street: '',
+          city: '',
+          state: '',
+          country: '',
+          loginId: '',
+          password: '',
+        });
+        setOtpSent(false);
+        setOtpEmail('');
+        setOtpMobile('');
+        setGeneratedOtpMobile('');
+        setVerifiedEmail(false);
+        setVerifiedMobile(false);
       } else {
         setError(data.error || 'Registration failed');
       }
@@ -171,15 +185,12 @@ const Signup = () => {
 
       <input name="firstName" placeholder="First Name" value={formData.firstName} onChange={handleChange} disabled={otpSent} />
       <input name="lastName" placeholder="Last Name" value={formData.lastName} onChange={handleChange} disabled={otpSent} />
-
       <input name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} disabled={otpSent} />
       <input name="mobile" placeholder="Mobile" value={formData.mobile} onChange={handleChange} disabled={otpSent} />
-
       <input name="street" placeholder="Street" value={formData.street} onChange={handleChange} disabled={otpSent} />
       <input name="city" placeholder="City" value={formData.city} onChange={handleChange} disabled={otpSent} />
       <input name="state" placeholder="State" value={formData.state} onChange={handleChange} disabled={otpSent} />
       <input name="country" placeholder="Country" value={formData.country} onChange={handleChange} disabled={otpSent} />
-
       <input name="loginId" placeholder="Login ID" value={formData.loginId} onChange={handleChange} disabled={otpSent} />
       <input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleChange} disabled={otpSent} />
 
@@ -189,7 +200,6 @@ const Signup = () => {
         </button>
       ) : (
         <div>
-          
           <div>
             <input
               placeholder="Email OTP"
@@ -200,7 +210,6 @@ const Signup = () => {
             <button onClick={() => verifyOtp('email')} disabled={verifiedEmail || loading || !otpEmail.trim()}>
               {verifiedEmail ? 'Verified' : 'Verify Email OTP'}
             </button>
-           
           </div>
           <div>
             <input
@@ -212,23 +221,20 @@ const Signup = () => {
             <button onClick={() => verifyOtp('mobile')} disabled={verifiedMobile || loading || !otpMobile.trim()}>
               {verifiedMobile ? 'Verified' : 'Verify Mobile OTP'}
             </button>
-            {generatedOtpMobile && <p style={{ color: 'blue' }}>Generated OTP: {generatedOtpMobile}</p>}
+            {generatedOtpMobile && <p style={{ color: 'blue' }}>Generated Mobile OTP: {generatedOtpMobile}</p>}
           </div>
 
           {bothVerified && (
             <button onClick={finalizeRegistration} disabled={loading}>
               {loading ? 'Registering...' : ' Register'}
             </button>
-            
           )}
           {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
- 
         </div>
       )}
 
       <div className="form-footer">
-         Already have an account? 
-         <a href="/login">Login</a>
+        Already have an account? <a href="/login">Login</a>
       </div>
       <div>
         <a href="/admin">Admin</a>
