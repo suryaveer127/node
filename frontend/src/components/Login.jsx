@@ -39,11 +39,7 @@ const Login = () => {
       if (response.ok) {
        
 localStorage.setItem('currentUser', JSON.stringify(data.user));
-const socket = io(`https://not-4adl.onrender.com`);
-      socket.emit('joinLive', {
-        email: data.user.email,
-        name: data.user.name,
-      });
+
         // Navigate to UserList page passing userId without socket
         navigate('/users');
       } else {
