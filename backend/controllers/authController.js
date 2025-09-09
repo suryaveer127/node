@@ -103,14 +103,19 @@ exports.login = async (req, res) => {
     }
     if (req.io) {
     req.io.emit('userLoggedIn', {
-      email: user.email,
-      name: `${user.firstName} ${user.lastName}`,
-      socketId: null, // socketId assigned on socket joinLive event
+      _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        mobile: user.mobile,
+        loginId: user.loginId,
+        address: user.address,
+        creationTime: user.createdAt, // socketId assigned on socket joinLive event
     });
   }
    
     res.json({
-      id: user._id,
+      _id: user._id,
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
@@ -138,21 +143,51 @@ exports.getAllUsers = async (req, res) => {
 exports.logout = async (req, res) => {
   try {
     const { email } = req.body;
-    if (!email) return res.status(400).json({ error: 'Email required' });
+    if (!email) return res.status(400).json({ error: "Email required" });
 
-    // Assuming you manage liveUsers in memory
-    const socketEntry = Array.from(liveUsers.entries()).find(([_, user]) => user.email === email);
-    if (socketEntry) {
-      const [socketId] = socketEntry;
-      liveUsers.delete(socketId);
-
-      req.io.to("live_users").emit("updateLiveUsers", Array.from(liveUsers.values()));
-      req.io.to("admin_room").emit("updateLiveUsers", Array.from(liveUsers.values()));
+    // Find the user in DB to emit proper object
+    const user = await User.findOne({ email }).select("-password -__v");
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
+
+    // If you're managing liveUsers in memory:
+    if (typeof liveUsers !== "undefined") {
+      const socketEntry = Array.from(liveUsers.entries()).find(
+        ([, u]) => u.email === email
+      );
+      if (socketEntry) {
+        const [socketId] = socketEntry;
+        liveUsers.delete(socketId);
+
+        // Emit updated live users list to all clients
+        req.io.to("live_users").emit(
+          "updateLiveUsers",
+          Array.from(liveUsers.values())
+        );
+        req.io.to("admin_room").emit(
+          "updateLiveUsers",
+          Array.from(liveUsers.values())
+        );
+      }
+    }
+
+    // 🔹 Explicitly tell frontend which user logged out
+    req.io.emit("userLoggedOut", {
+      _id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      mobile: user.mobile,
+      loginId: user.loginId,
+      address: user.address,
+      creationTime: user.createdAt,
+    });
 
     return res.json({ success: true });
   } catch (err) {
-    console.error('Logout error:', err);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Logout error:", err);
+    res.status(500).json({ error: "Server error" });
   }
 };
+
