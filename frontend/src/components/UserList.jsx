@@ -224,13 +224,10 @@ const UserList = () => {
   };
 
   if (!currentUser) return <div>User logged out</div>;
-  const getUserName = (user) => {
-    if (user.name) return user.name;
-    if (user.firstName || user.lastName) {
-      return `${user.firstName || ""} ${user.lastName || ""}`.trim();
-    }
-    return "Unknown User";
-  };
+ const getUserName = (user) => {
+  return `${user.firstName || ""} ${user.lastName || ""}`.trim() || "Unknown User";
+};
+
   return (
     <div>
       <h2>User List</h2>
