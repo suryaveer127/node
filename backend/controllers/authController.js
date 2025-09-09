@@ -123,26 +123,6 @@ exports.login = async (req, res) => {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Server error' });
   }
-
-  // POST /api/auth/logout
-router.post('/logout', (req, res) => {
-  const { email } = req.body;
-  if (!email) return res.status(400).json({ error: 'Email required' });
-
-  // Remove the user from liveUsers map
-  const socketEntry = Array.from(liveUsers.entries()).find(([_, user]) => user.email === email);
-  if (socketEntry) {
-    const [socketId] = socketEntry;
-    liveUsers.delete(socketId);
-
-    // Broadcast updated live users
-    req.io.to("live_users").emit("updateLiveUsers", Array.from(liveUsers.values()));
-    req.io.to("admin_room").emit("updateLiveUsers", Array.from(liveUsers.values()));
-  }
-
-  return res.json({ success: true });
-});
-
 };
 
 exports.getAllUsers = async (req, res) => {
@@ -151,6 +131,28 @@ exports.getAllUsers = async (req, res) => {
     res.json(users);
   } catch (err) {
     console.error('Get users error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.logout = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email required' });
+
+    // Assuming you manage liveUsers in memory
+    const socketEntry = Array.from(liveUsers.entries()).find(([_, user]) => user.email === email);
+    if (socketEntry) {
+      const [socketId] = socketEntry;
+      liveUsers.delete(socketId);
+
+      req.io.to("live_users").emit("updateLiveUsers", Array.from(liveUsers.values()));
+      req.io.to("admin_room").emit("updateLiveUsers", Array.from(liveUsers.values()));
+    }
+
+    return res.json({ success: true });
+  } catch (err) {
+    console.error('Logout error:', err);
     res.status(500).json({ error: 'Server error' });
   }
 };

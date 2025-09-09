@@ -24,7 +24,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/otp', otpRoutes);
 
-// Add io to req if needed in routes
+
 
 
 // MongoDB connection
