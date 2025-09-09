@@ -40,7 +40,6 @@ io.on('connection', (socket) => {
   // User joins live room
   socket.on("joinLive", (userData) => {
     liveUsers.set(socket.id, {
-      _id: userData._id,
       email: userData.email,
       name: `${userData.firstName} ${userData.lastName}`,
       socketId: socket.id

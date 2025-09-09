@@ -164,7 +164,7 @@ const UserList = () => {
 
     socket.on("connect", () => {
   if (currentUser) {
-    const userInfo = currentUser.user || currentUser ; // handles both shapes
+   
     socket.emit("joinLive", {
       email: currentUser.email,
       name: `${currentUser.firstName} ${currentUser.lastName}`,
@@ -244,7 +244,7 @@ const UserList = () => {
         </thead>
         <tbody>
           {allUsers.map((user) => (
-            <tr key={user._id}>
+            <tr key={user.email}>
               <td>{getUserName(user)}</td>
               <td>{user.email}</td>
               <td>{isUserLive(user.email) ? "Online" : "Offline"}</td>

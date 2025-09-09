@@ -60,6 +60,8 @@ exports.registration = async (req, res) => {
     });
 
     await newUser.save();
+        console.log('New user saved:', newUser);
+
 
     
     await redisClient.del(`tempUser:${email}`);
@@ -69,7 +71,7 @@ exports.registration = async (req, res) => {
     if (req.io) {
       console.log("Emitting userRegistered after registration for:", newUser.email);
       req.io.emit("userRegistered", {
-        _id: newUser._id,
+       
         firstName: newUser.firstName,
         lastName: newUser.lastName,
         email: newUser.email,
@@ -101,9 +103,11 @@ exports.login = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ error: 'Invalid Email or Password' });
     }
+    
+    console.log('Login successful for:', email);
     if (req.io) {
     req.io.emit('userLoggedIn', {
-      _id: user._id,
+     
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
@@ -115,7 +119,7 @@ exports.login = async (req, res) => {
   }
    
     res.json({
-      _id: user._id,
+      
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
@@ -174,7 +178,7 @@ exports.logout = async (req, res) => {
 
     // 🔹 Explicitly tell frontend which user logged out
     req.io.emit("userLoggedOut", {
-      _id: user._id,
+     
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
