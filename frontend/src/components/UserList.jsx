@@ -63,7 +63,8 @@ const UserList = () => {
       }
     };
   socket.on('userRegistered', (newUser) => {
-      setAllUsers((prev) => [...prev, newUser]);
+      console.log("Received userRegistered event:", newUser);
+      setAllUsers(prev => [...prev, newUser]);
     });
 
     

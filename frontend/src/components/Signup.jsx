@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-
+import { Navigate } from 'react-router-dom';
 const Signup = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -130,24 +131,37 @@ const Signup = () => {
     }
   };
 
-  const finalizeRegistration = async () => {
-    if (!verifiedEmail || !verifiedMobile) {
-      setError('Please verify both email and mobile OTPs');
-      return;
-    }
-    setLoading(true);
-    setError('');
-    try {
-      const response = await fetch(`https://not-4adl.onrender.com/api/auth/register-final`, {
+
+
+const finalizeRegistration = async () => {
+  if (!verifiedEmail || !verifiedMobile) {
+    setError('Please verify both email and mobile OTPs');
+    return;
+  }
+  setLoading(true);
+  setError('');
+  try {
+    const response = await fetch(`https://not-4adl.onrender.com/api/auth/register-final`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: formData.email }),
+    });
+    const data = await response.json();
+
+    if (response.ok) {
+      setSuccessMessage('Registration successful! Logging in...');
+
+      // Automatically login user
+      const loginResponse = await fetch('https://not-4adl.onrender.com/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email }),
+        body: JSON.stringify({ email: formData.email, password: formData.password }),
       });
-      const data = await response.json();
-      if (response.ok) {
-        setSuccessMessage('Registration successful! Please Login');
+      const loginData = await loginResponse.json();
 
-       
+      if (loginResponse.ok) {
+        localStorage.setItem('currentUser', JSON.stringify(loginData));
+        // Reset registration form and states
         setFormData({
           firstName: '',
           lastName: '',
@@ -166,15 +180,22 @@ const Signup = () => {
         setGeneratedOtpMobile('');
         setVerifiedEmail(false);
         setVerifiedMobile(false);
+
+        // Navigate to UserList page after login
+        navigate('/users');
       } else {
-        setError(data.error || 'Registration failed');
+        setError(loginData.error || 'Auto-login failed, please login manually.');
       }
-    } catch {
-      setError('Server error during finalization');
-    } finally {
-      setLoading(false);
+    } else {
+      setError(data.error || 'Registration failed');
     }
-  };
+  } catch {
+    setError('Server error during finalization');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const bothVerified = verifiedEmail && verifiedMobile;
 

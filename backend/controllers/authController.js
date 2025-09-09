@@ -67,6 +67,7 @@ exports.registration = async (req, res) => {
     await redisClient.del(`mobile:${userData.mobile}`);
     await redisClient.del(`email:${email}`);
     if (req.io) {
+      console.log("Emitting userRegistered after registration for:", newUser.email);
       req.io.emit("userRegistered", {
         _id: newUser._id,
         firstName: newUser.firstName,
