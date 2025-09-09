@@ -1,9 +1,169 @@
+// import React, { useEffect, useState, useRef } from 'react';
+// import { io } from 'socket.io-client';
+
+// const UserList = () => {
+  
+  
+//   const [currentUser, setCurrentUser] = useState(null);
+//   const [allUsers, setAllUsers] = useState([]);
+//   const [liveUsers, setLiveUsers] = useState([]);
+//   const [popupUser, setPopupUser] = useState(null);
+//   const socketRef = useRef(null);
+
+//   useEffect(() => {
+//     const storedUser = localStorage.getItem('currentUser');
+//     if (storedUser && storedUser !== 'undefined') {
+//       try {
+//         setCurrentUser(JSON.parse(storedUser));
+//       } catch (e) {
+//         console.error('Failed to parse currentUser from localStorage:', e);
+//         localStorage.removeItem('currentUser');
+//       }
+//     }
+//   }, []);
+
+//   useEffect(() => {
+//     fetch(`https://not-4adl.onrender.com/api/auth/users`)
+//       .then(res => res.json())
+//       .then(data => {
+//         setAllUsers(Array.isArray(data) ? data : []);
+//       })
+//       .catch(console.error);
+//   }, []);
+
+//   useEffect(() => {
+//     if (!currentUser) return;
+
+//     setLiveUsers([]);
+
+//     const socket = io(`https://not-4adl.onrender.com`);
+//     socketRef.current = socket;
+
+//     socket.on('connect', () => {
+//       console.log('Socket connected:', socket.id);
+//       socket.emit('joinLive', {
+//         email: currentUser.email,
+//         name: `${currentUser.firstName} ${currentUser.lastName}`,
+//       });
+//     });
+
+//     socket.on('updateLiveUsers', (liveList) => {
+//     console.log('updateLiveUsers event received:', liveList);
+//     setLiveUsers(liveList || []);
+//   });
+//   socket.on('userLoggedIn', (user) => {
+//     console.log('User logged in:', user);
+//     // Optional: show toast or log login event
+//   });
+
+//     const handleBeforeUnload = () => {
+//       if (socketRef.current && currentUser) {
+//         socketRef.current.emit('logoutUser', { email: currentUser.email });
+//         socketRef.current.disconnect();
+//       }
+//     };
+//   socket.on('userRegistered', (newUser) => {
+//       console.log("Received userRegistered event:", newUser);
+//       setAllUsers(prev => [...prev, newUser]);
+//     });
+
+    
+    
+//     window.addEventListener('beforeunload', handleBeforeUnload);
+
+//     return () => {
+//       window.removeEventListener('beforeunload', handleBeforeUnload);
+//       socket.disconnect();
+//       socketRef.current = null;
+//     };
+//   }, [currentUser]);
+
+//   const emailMatch = (a, b) =>
+//     (a || '').trim().toLowerCase() === (b || '').trim().toLowerCase();
+
+//   const isUserLive = email =>
+//     liveUsers.some(lu => lu && emailMatch(lu.email, email));
+
+//   const handleUserClick = user => {
+//     setPopupUser(user);
+//   };
+
+//   const closePopup = () => setPopupUser(null);
+
+//   const handleLogout = () => {
+//     if (socketRef.current && currentUser) {
+//       socketRef.current.emit('logoutUser', { email: currentUser.email });
+//       socketRef.current.disconnect();
+//     }
+//     localStorage.removeItem('currentUser');
+//     setCurrentUser(null);
+//   };
+
+//   if (!currentUser) {
+//     return (
+//       <div className="logout-message">
+//         User is logged out. Please login again.
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="userlist-container">
+//       <h2 className="userlist-title">User List</h2>
+
+//       <button className="logout-btn" onClick={handleLogout}>
+//         Logout
+//       </button>
+
+//       <table className="userlist-table">
+//         <thead>
+//           <tr>
+//             <th>Name</th><th>Email</th><th>Status</th>
+//           </tr>
+//         </thead>
+//         <tbody>
+//           {allUsers.length === 0 ? (
+//             <tr><td colSpan="3" className="no-users">No users registered</td></tr>
+//           ) : allUsers.map(user => {
+//               const online = isUserLive(user.email);
+//               return (
+//                 <tr key={user._id} onClick={() => handleUserClick(user)} className="user-row">
+//                   <td>{user.firstName} {user.lastName}</td>
+//                   <td>{user.email}</td>
+//                   <td className={online ? 'status-online' : 'status-offline'}>
+//                     {online ? 'Online' : 'Offline'}
+//                   </td>
+//                 </tr>
+//               );
+//             })}
+//         </tbody>
+//       </table>
+
+//       {popupUser && (
+//         <div className="popup-overlay" onClick={closePopup}>
+//           <div className="popup-content" onClick={e => e.stopPropagation()}>
+//             <h3>User Info</h3>
+//             <p><b>Name:</b> {popupUser.firstName} {popupUser.lastName}</p>
+//             <p><b>Email:</b> {popupUser.email}</p>
+//             <p><b>Mobile:</b> {popupUser.mobile}</p>
+//             <p><b>Address:</b> {popupUser.address?.street}, {popupUser.address?.city}, {popupUser.address?.state}, {popupUser.address?.country}</p>
+//             <p><b>Login ID:</b> {popupUser.loginId}</p>
+//             <p><b>Created At:</b> {popupUser.creationTime ? new Date(popupUser.creationTime).toLocaleString() : ''}</p>
+//             <button className="popup-close-btn" onClick={closePopup}>Close</button>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default UserList;
+
+
 import React, { useEffect, useState, useRef } from 'react';
 import { io } from 'socket.io-client';
 
 const UserList = () => {
-  
-  
   const [currentUser, setCurrentUser] = useState(null);
   const [allUsers, setAllUsers] = useState([]);
   const [liveUsers, setLiveUsers] = useState([]);
@@ -25,9 +185,7 @@ const UserList = () => {
   useEffect(() => {
     fetch(`https://not-4adl.onrender.com/api/auth/users`)
       .then(res => res.json())
-      .then(data => {
-        setAllUsers(Array.isArray(data) ? data : []);
-      })
+      .then(data => setAllUsers(Array.isArray(data) ? data : []))
       .catch(console.error);
   }, []);
 
@@ -48,13 +206,38 @@ const UserList = () => {
     });
 
     socket.on('updateLiveUsers', (liveList) => {
-    console.log('updateLiveUsers event received:', liveList);
-    setLiveUsers(liveList || []);
-  });
-  socket.on('userLoggedIn', (user) => {
-    console.log('User logged in:', user);
-    // Optional: show toast or log login event
-  });
+      setLiveUsers(liveList || []);
+    });
+
+    socket.on('userLoggedIn', (user) => {
+      console.log('User logged in:', user);
+    });
+
+    socket.on('userRegistered', (newUser) => {
+      setAllUsers(prev => {
+        if (prev.some(u => u.email === newUser.email)) return prev;
+        return [...prev, newUser];
+      });
+      try {
+        localStorage.setItem('newUserRegistered', JSON.stringify(newUser));
+        localStorage.removeItem('newUserRegistered');
+      } catch {}
+    });
+
+    const handleStorage = (event) => {
+      if (event.key === 'newUserRegistered' && event.newValue) {
+        try {
+          const newUser = JSON.parse(event.newValue);
+          setAllUsers(prevUsers => {
+            if (prevUsers.some(u => u.email === newUser.email)) return prevUsers;
+            return [...prevUsers, newUser];
+          });
+        } catch (error) {
+          console.error('Error parsing newUserRegistered from localStorage:', error);
+        }
+      }
+    };
+    window.addEventListener('storage', handleStorage);
 
     const handleBeforeUnload = () => {
       if (socketRef.current && currentUser) {
@@ -62,31 +245,21 @@ const UserList = () => {
         socketRef.current.disconnect();
       }
     };
-  socket.on('userRegistered', (newUser) => {
-      console.log("Received userRegistered event:", newUser);
-      setAllUsers(prev => [...prev, newUser]);
-    });
-
-    
-    
     window.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => {
+      window.removeEventListener('storage', handleStorage);
       window.removeEventListener('beforeunload', handleBeforeUnload);
       socket.disconnect();
       socketRef.current = null;
     };
   }, [currentUser]);
 
-  const emailMatch = (a, b) =>
-    (a || '').trim().toLowerCase() === (b || '').trim().toLowerCase();
+  const emailMatch = (a, b) => (a || '').trim().toLowerCase() === (b || '').trim().toLowerCase();
 
-  const isUserLive = email =>
-    liveUsers.some(lu => lu && emailMatch(lu.email, email));
+  const isUserLive = email => liveUsers.some(lu => lu && emailMatch(lu.email, email));
 
-  const handleUserClick = user => {
-    setPopupUser(user);
-  };
+  const handleUserClick = user => setPopupUser(user);
 
   const closePopup = () => setPopupUser(null);
 
@@ -100,26 +273,18 @@ const UserList = () => {
   };
 
   if (!currentUser) {
-    return (
-      <div className="logout-message">
-        User is logged out. Please login again.
-      </div>
-    );
+    return <div className="logout-message">User is logged out. Please login again.</div>;
   }
 
   return (
     <div className="userlist-container">
       <h2 className="userlist-title">User List</h2>
 
-      <button className="logout-btn" onClick={handleLogout}>
-        Logout
-      </button>
+      <button className="logout-btn" onClick={handleLogout}>Logout</button>
 
       <table className="userlist-table">
         <thead>
-          <tr>
-            <th>Name</th><th>Email</th><th>Status</th>
-          </tr>
+          <tr><th>Name</th><th>Email</th><th>Status</th></tr>
         </thead>
         <tbody>
           {allUsers.length === 0 ? (

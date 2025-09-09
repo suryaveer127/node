@@ -162,6 +162,13 @@ const finalizeRegistration = async () => {
       if (loginResponse.ok) {
         localStorage.setItem('currentUser', JSON.stringify(loginData));
         // Reset registration form and states
+         const newUserData = {
+    email: formData.email,
+    token: loginData.token,
+    userInfo: loginData
+  };
+  localStorage.setItem('newUserRegistered', JSON.stringify(newUserData));
+  localStorage.removeItem('newUserRegistered');
         setFormData({
           firstName: '',
           lastName: '',
