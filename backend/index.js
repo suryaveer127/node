@@ -122,6 +122,16 @@ io.on('connection', (socket) => {
     io.to("admin_room").emit("updateLiveUsers", Array.from(liveUsers.values()));
   });
 
+   socket.on("userLoggedIn", (userData) => {
+    // Add or update liveUsers map with this socket id and user data
+    liveUsers.set(socket.id, {
+      email: userData.email,
+      name: userData.name,
+      socketId: socket.id
+    });
+    io.to("live_users").emit("updateLiveUsers", Array.from(liveUsers.values()));
+    io.to("admin_room").emit("updateLiveUsers", Array.from(liveUsers.values()));
+  });
  
   socket.on("joinAdmin", () => {
     console.log(`Admin joined: ${socket.id}`);

@@ -34,6 +34,14 @@ const AdminPanel = () => {
         setLiveUsers([]);
       }
     });
+    socket.on('userLoggedIn', (loggedInUser) => {
+    setLiveUsers(prev => {
+      if (prev.some(u => u.email === loggedInUser.email)) {
+        return prev;
+      }
+      return [...prev, loggedInUser];
+    });
+  });
     
 
     

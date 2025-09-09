@@ -54,6 +54,14 @@ const UserList = () => {
         setLiveUsers([]);
       }
     });
+    socket.on('userLoggedIn', (loggedInUser) => {
+    setLiveUsers(prev => {
+      if (prev.some(u => u.email === loggedInUser.email)) {
+        return prev;
+      }
+      return [...prev, loggedInUser];
+    });
+  });
 
     const handleBeforeUnload = () => {
       if (socketRef.current && currentUser) {

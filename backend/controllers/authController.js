@@ -101,9 +101,11 @@ exports.login = async (req, res) => {
       return res.status(400).json({ error: 'Invalid Email or Password' });
     }
       if (req.io) {
-      req.io.emit('userRegistered', {
-        email: newUser.email,
-        name: `${newUser.firstName} ${newUser.lastName}`,
+      // Emit a userLoggedIn event so socket server can update liveUsers list
+      req.io.emit('userLoggedIn', {
+        email: user.email,
+        name: `${user.firstName} ${user.lastName}`,
+        socketId: null // socketId will be set in socket connection handler
       });
     }
     res.json({
