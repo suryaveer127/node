@@ -72,9 +72,10 @@ const UserList = () => {
     });
 
     // User logged out
-    socket.on('userLoggedOut', (user) => {
-      setLiveUsers(prev => prev.filter(u => u.email !== user.email));
-    });
+   socket.on('userLoggedOut', (loggedOutUser) => {
+  setLiveUsers(prev => prev.filter(u => u._id !== loggedOutUser._id));
+});
+
 
     return () => socket.disconnect();
   }, [currentUser]);
@@ -83,13 +84,12 @@ const UserList = () => {
     liveUsers.some(u => u.email === email);
 
   const handleLogout = () => {
-    if (socketRef.current && currentUser) {
-      socketRef.current.emit('logoutUser', { email: currentUser.email });
-      socketRef.current.disconnect();
-    }
-    localStorage.removeItem('currentUser');
-    setCurrentUser(null);
-  };
+  if (socketRef.current) {
+    socketRef.current.disconnect(); // disconnect only this tab
+  }
+  localStorage.removeItem('currentUser');
+  setCurrentUser(null);
+};
 
   if (!currentUser) return <div>User logged out</div>;
 

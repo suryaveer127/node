@@ -62,20 +62,20 @@ io.on('connection', (socket) => {
   });
 
   // Disconnect
-  socket.on("disconnect", () => {
-    console.log('User disconnected:', socket.id);
-    const disconnectedUser = liveUsers.get(socket.id);
-    liveUsers.delete(socket.id);
+socket.on("disconnect", () => {
+  const disconnectedUser = liveUsers.get(socket.id);
+  liveUsers.delete(socket.id);
 
-    // Broadcast updated live users
-    io.to("live_users").emit("updateLiveUsers", Array.from(liveUsers.values()));
-    io.to("admin_room").emit("updateLiveUsers", Array.from(liveUsers.values()));
+  // Update live users for everyone in "live_users" room
+  io.to("live_users").emit("updateLiveUsers", Array.from(liveUsers.values()));
 
-    // Notify all clients that a user logged out
-    if (disconnectedUser) {
-      io.emit("userLoggedOut", disconnectedUser);
-    }
-  });
+  // Notify other users that this specific user logged out
+  // Use a broadcast so the user themselves doesn't receive it
+  if (disconnectedUser) {
+    socket.broadcast.to("live_users").emit("userLoggedOut", disconnectedUser);
+  }
+});
+
 });
 
 // Serve frontend if needed
