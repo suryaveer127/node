@@ -1,279 +1,7 @@
-// import React, { useState } from 'react';
-// import { useNavigate } from 'react-router-dom';
-// const Signup = () => {
-//   const navigate = useNavigate();
-//   const [formData, setFormData] = useState({
-//     firstName: '',
-//     lastName: '',
-//     email: '',
-//     mobile: '',
-//     street: '',
-//     city: '',
-//     state: '',
-//     country: '',
-//     loginId: '',
-//     password: '',
-//   });
-
-//   const [otpSent, setOtpSent] = useState(false);
-//   const [otpEmail, setOtpEmail] = useState('');
-//   const [otpMobile, setOtpMobile] = useState('');
-//   const [generatedOtpMobile, setGeneratedOtpMobile] = useState('');
-//   const [verifiedEmail, setVerifiedEmail] = useState(false);
-//   const [verifiedMobile, setVerifiedMobile] = useState(false);
-//   const [loading, setLoading] = useState(false);
-//   const [error, setError] = useState('');
-//   const [successMessage, setSuccessMessage] = useState('');
-
-//   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
-
-//   const validate = () => {
-//     if (!formData.firstName.trim()) return 'First name is required';
-//     if (!formData.lastName.trim()) return 'Last name is required';
-//     if (!/\S+@\S+\.\S+/.test(formData.email)) return 'Invalid email';
-//     if (!/^\d{10}$/.test(formData.mobile)) return 'Mobile must be 10 digits';
-//     if (!formData.street.trim()) return 'Street is required';
-//     if (!formData.city.trim()) return 'City is required';
-//     if (!formData.state.trim()) return 'State is required';
-//     if (!formData.country.trim()) return 'Country is required';
-//     if (!formData.loginId.match(/^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{8}$/)) 
-//       return 'Login ID must be 8 chars with letters and digits';
-//     if (!formData.password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{6,}$/)) 
-//       return 'Password must be 6 chars with 1 uppercase, 1 lowercase & 1 special char.';
-//     return '';
-//   };
-
-//   const saveTempUser = async () => {
-//     setLoading(true);
-//     setError('');
-//     try {
-//       const response = await fetch(`https://not-4adl.onrender.com/api/auth/register-temp`, {
-//         method: 'POST',
-//         headers: { 'Content-Type': 'application/json' },
-//         body: JSON.stringify(formData),
-//       });
-//       const data = await response.json();
-//       if (response.ok) return true;
-//       setError(data.error || 'Failed to save temporary user');
-//       return false;
-//     } catch {
-//       setError('Server error saving temporary user');
-//       return false;
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const sendOtp = async () => {
-//     const validationError = validate();
-//     if (validationError) {
-//       setError(validationError);
-//       return;
-//     }
-//     const saved = await saveTempUser();
-//     if (!saved) return;
-
-//     setLoading(true);
-//     setError('');
-//     try {
-//       const [emailRes, mobileRes] = await Promise.all([
-//         fetch(`https://not-4adl.onrender.com/api/otp/send`, {
-//           method: 'POST',
-//           headers: { 'Content-Type': 'application/json' },
-//           body: JSON.stringify({ contact: formData.email, type: 'email' }),
-//         }),
-//         fetch(`https://not-4adl.onrender.com/api/otp/send`, {
-//           method: 'POST',
-//           headers: { 'Content-Type': 'application/json' },
-//           body: JSON.stringify({ contact: formData.mobile, type: 'mobile' }),
-//         }),
-//       ]);
-//       const emailData = await emailRes.json();
-//       const mobileData = await mobileRes.json();
-
-//       if (emailRes.ok && mobileRes.ok) {
-//         setGeneratedOtpMobile(mobileData.otp || '');
-//         setOtpSent(true);
-//       } else {
-//         setError('Failed to send OTPs');
-//       }
-//     } catch {
-//       setError('Server error sending OTPs');
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const verifyOtp = async (type) => {
-//     setLoading(true);
-//     setError('');
-//     const otpValue = type === 'email' ? otpEmail : otpMobile;
-//     try {
-//       const response = await fetch(`https://not-4adl.onrender.com/api/otp/verify`, {
-//         method: 'POST',
-//         headers: { 'Content-Type': 'application/json' },
-//         body: JSON.stringify({ 
-//           contact: type === 'email' ? formData.email : formData.mobile, 
-//           otp: otpValue, 
-//           type 
-//         }),
-//       });
-//       const data = await response.json();
-//       if (response.ok) {
-//         type === 'email' ? setVerifiedEmail(true) : setVerifiedMobile(true);
-//       } else {
-//         setError(data.error || `Failed to verify ${type} OTP`);
-//       }
-//     } catch {
-//       setError('Server error verifying OTP');
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-
-
-// const finalizeRegistration = async () => {
-//   if (!verifiedEmail || !verifiedMobile) {
-//     setError('Please verify both email and mobile OTPs');
-//     return;
-//   }
-//   setLoading(true);
-//   setError('');
-//   try {
-//     const response = await fetch(`https://not-4adl.onrender.com/api/auth/register-final`, {
-//       method: 'POST',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify({ email: formData.email }),
-//     });
-//     const data = await response.json();
-
-//     if (response.ok) {
-//       setSuccessMessage('Registration successful! Logging in...');
-
-//       // Automatically login user
-//       const loginResponse = await fetch('https://not-4adl.onrender.com/api/auth/login', {
-//         method: 'POST',
-//         headers: { 'Content-Type': 'application/json' },
-//         body: JSON.stringify({ email: formData.email, password: formData.password }),
-//       });
-//       const loginData = await loginResponse.json();
-
-//       if (loginResponse.ok) {
-//         localStorage.setItem('currentUser', JSON.stringify(loginData));
-//         // Reset registration form and states
-//         setFormData({
-//           firstName: '',
-//           lastName: '',
-//           email: '',
-//           mobile: '',
-//           street: '',
-//           city: '',
-//           state: '',
-//           country: '',
-//           loginId: '',
-//           password: '',
-//         });
-//         setOtpSent(false);
-//         setOtpEmail('');
-//         setOtpMobile('');
-//         setGeneratedOtpMobile('');
-//         setVerifiedEmail(false);
-//         setVerifiedMobile(false);
-
-//         // Navigate to UserList page after login
-//         navigate('/users');
-//       } else {
-//         setError(loginData.error || 'Auto-login failed, please login manually.');
-//       }
-//     } else {
-//       setError(data.error || 'Registration failed');
-//     }
-//   } catch {
-//     setError('Server error during finalization');
-//   } finally {
-//     setLoading(false);
-//   }
-// };
-
-
-//   const bothVerified = verifiedEmail && verifiedMobile;
-
-//   return (
-//     <div className="form-container">
-//       <h2>Sign Up</h2>
-//       {error && <p style={{ color: 'red' }}>{error}</p>}
-
-//       <input name="firstName" placeholder="First Name" value={formData.firstName} onChange={handleChange} disabled={otpSent} />
-//       <input name="lastName" placeholder="Last Name" value={formData.lastName} onChange={handleChange} disabled={otpSent} />
-//       <input name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} disabled={otpSent} />
-//       <input name="mobile" placeholder="Mobile" value={formData.mobile} onChange={handleChange} disabled={otpSent} />
-//       <input name="street" placeholder="Street" value={formData.street} onChange={handleChange} disabled={otpSent} />
-//       <input name="city" placeholder="City" value={formData.city} onChange={handleChange} disabled={otpSent} />
-//       <input name="state" placeholder="State" value={formData.state} onChange={handleChange} disabled={otpSent} />
-//       <input name="country" placeholder="Country" value={formData.country} onChange={handleChange} disabled={otpSent} />
-//       <input name="loginId" placeholder="Login ID" value={formData.loginId} onChange={handleChange} disabled={otpSent} />
-//       <input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleChange} disabled={otpSent} />
-
-//       {!otpSent ? (
-//         <button onClick={sendOtp} disabled={loading}>
-//           {loading ? 'Sending OTP...' : 'Send OTP'}
-//         </button>
-//       ) : (
-//         <div>
-//           <div>
-//             <input
-//               placeholder="Email OTP"
-//               value={otpEmail}
-//               onChange={(e) => setOtpEmail(e.target.value)}
-//               disabled={verifiedEmail || loading}
-//             />
-//             <button onClick={() => verifyOtp('email')} disabled={verifiedEmail || loading || !otpEmail.trim()}>
-//               {verifiedEmail ? 'Verified' : 'Verify Email OTP'}
-//             </button>
-//           </div>
-//           <div>
-//             <input
-//               placeholder="Mobile OTP"
-//               value={otpMobile}
-//               onChange={(e) => setOtpMobile(e.target.value)}
-//               disabled={verifiedMobile || loading}
-//             />
-//             <button onClick={() => verifyOtp('mobile')} disabled={verifiedMobile || loading || !otpMobile.trim()}>
-//               {verifiedMobile ? 'Verified' : 'Verify Mobile OTP'}
-//             </button>
-//             {generatedOtpMobile && <p style={{ color: 'blue' }}>Generated Mobile OTP: {generatedOtpMobile}</p>}
-//           </div>
-
-//           {bothVerified && (
-//             <button onClick={finalizeRegistration} disabled={loading}>
-//               {loading ? 'Registering...' : ' Register'}
-//             </button>
-//           )}
-//           {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
-//         </div>
-//       )}
-
-//       <div className="form-footer">
-//         Already have an account? <a href="/login">Login</a>
-//       </div>
-//       <div>
-//         <a href="/admin">Admin</a>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Signup;
-
-
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
 const Signup = () => {
   const navigate = useNavigate();
-
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -297,17 +25,6 @@ const Signup = () => {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Store multiple users in localStorage (array of users)
-  const [users, setUsers] = useState(() => {
-    const saved = localStorage.getItem('multiUsers');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  // Sync users to localStorage when changed
-  useEffect(() => {
-    localStorage.setItem('multiUsers', JSON.stringify(users));
-  }, [users]);
-
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const validate = () => {
@@ -319,9 +36,9 @@ const Signup = () => {
     if (!formData.city.trim()) return 'City is required';
     if (!formData.state.trim()) return 'State is required';
     if (!formData.country.trim()) return 'Country is required';
-    if (!formData.loginId.match(/^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{8}$/))
+    if (!formData.loginId.match(/^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{8}$/)) 
       return 'Login ID must be 8 chars with letters and digits';
-    if (!formData.password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{6,}$/))
+    if (!formData.password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{6,}$/)) 
       return 'Password must be 6 chars with 1 uppercase, 1 lowercase & 1 special char.';
     return '';
   };
@@ -395,10 +112,10 @@ const Signup = () => {
       const response = await fetch(`https://not-4adl.onrender.com/api/otp/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contact: type === 'email' ? formData.email : formData.mobile,
-          otp: otpValue,
-          type,
+        body: JSON.stringify({ 
+          contact: type === 'email' ? formData.email : formData.mobile, 
+          otp: otpValue, 
+          type 
         }),
       });
       const data = await response.json();
@@ -414,72 +131,71 @@ const Signup = () => {
     }
   };
 
-  const finalizeRegistration = async () => {
-    if (!verifiedEmail || !verifiedMobile) {
-      setError('Please verify both email and mobile OTPs');
-      return;
-    }
-    setLoading(true);
-    setError('');
-    try {
-      const response = await fetch(`https://not-4adl.onrender.com/api/auth/register-final`, {
+
+
+const finalizeRegistration = async () => {
+  if (!verifiedEmail || !verifiedMobile) {
+    setError('Please verify both email and mobile OTPs');
+    return;
+  }
+  setLoading(true);
+  setError('');
+  try {
+    const response = await fetch(`https://not-4adl.onrender.com/api/auth/register-final`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: formData.email }),
+    });
+    const data = await response.json();
+
+    if (response.ok) {
+      setSuccessMessage('Registration successful! Logging in...');
+
+      // Automatically login user
+      const loginResponse = await fetch('https://not-4adl.onrender.com/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email }),
+        body: JSON.stringify({ email: formData.email, password: formData.password }),
       });
-      const data = await response.json();
+      const loginData = await loginResponse.json();
 
-      if (response.ok) {
-        setSuccessMessage('Registration successful! Logging in...');
-
-        const loginResponse = await fetch('https://not-4adl.onrender.com/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: formData.email, password: formData.password }),
+      if (loginResponse.ok) {
+        localStorage.setItem('currentUser', JSON.stringify(loginData));
+        // Reset registration form and states
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          mobile: '',
+          street: '',
+          city: '',
+          state: '',
+          country: '',
+          loginId: '',
+          password: '',
         });
-        const loginData = await loginResponse.json();
+        setOtpSent(false);
+        setOtpEmail('');
+        setOtpMobile('');
+        setGeneratedOtpMobile('');
+        setVerifiedEmail(false);
+        setVerifiedMobile(false);
 
-        if (loginResponse.ok) {
-          // Add or update user in multiUsers in localStorage but no UI for switching shown
-          setUsers((prevUsers) => {
-            const filtered = prevUsers.filter((u) => u.email !== formData.email);
-            return [...filtered, { email: formData.email, token: loginData.token, userInfo: loginData }];
-          });
-
-          // Reset form and OTP related states
-          setFormData({
-            firstName: '',
-            lastName: '',
-            email: '',
-            mobile: '',
-            street: '',
-            city: '',
-            state: '',
-            country: '',
-            loginId: '',
-            password: '',
-          });
-          setOtpSent(false);
-          setOtpEmail('');
-          setOtpMobile('');
-          setGeneratedOtpMobile('');
-          setVerifiedEmail(false);
-          setVerifiedMobile(false);
-
-          // Navigate to user list directly
-          navigate('/users');
-        } else {
-          setError(loginData.error || 'Auto-login failed, please login manually.');
-        }
+        // Navigate to UserList page after login
+        navigate('/users');
       } else {
-        setError(data.error || 'Registration failed');
+        setError(loginData.error || 'Auto-login failed, please login manually.');
       }
-    } catch {
-      setError('Server error during finalization');
-    } finally {
-      setLoading(false);
+    } else {
+      setError(data.error || 'Registration failed');
     }
-  };
+  } catch {
+    setError('Server error during finalization');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const bothVerified = verifiedEmail && verifiedMobile;
 
@@ -549,3 +265,5 @@ const Signup = () => {
 };
 
 export default Signup;
+
+
