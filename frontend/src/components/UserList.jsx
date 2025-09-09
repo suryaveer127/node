@@ -1,121 +1,3 @@
-// import React, { useEffect, useState, useRef } from 'react';
-// import { io } from 'socket.io-client';
-
-// const UserList = () => {
-//   const [currentUser, setCurrentUser] = useState(null);
-//   const [allUsers, setAllUsers] = useState([]);
-//   const [liveUsers, setLiveUsers] = useState([]);
-//   const [popupUser, setPopupUser] = useState(null);
-//   const socketRef = useRef(null);
-
-//   // Load current user (from sessionStorage now)
-//   useEffect(() => {
-//     const storedUser = sessionStorage.getItem('currentUser');
-//     if (storedUser && storedUser !== 'undefined') {
-//       try {
-//         setCurrentUser(JSON.parse(storedUser));
-//       } catch {
-//         sessionStorage.removeItem('currentUser');
-//       }
-//     }
-//   }, []);
-
-//   // Fetch initial users
-//   const fetchUsers = async () => {
-//     try {
-//       const res = await fetch('https://not-4adl.onrender.com/api/auth/users');
-//       const data = await res.json();
-//       setAllUsers(Array.isArray(data) ? data : []);
-//     } catch (err) {
-//       console.error(err);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchUsers();
-//   }, []);
-
-//   // Socket connection
-//   useEffect(() => {
-//     if (!currentUser) return;
-
-//     const socket = io('https://not-4adl.onrender.com');
-//     socketRef.current = socket;
-
-//     socket.on('connect', () => {
-//       socket.emit('joinLive', currentUser);
-//     });
-
-//     // Live status
-//     socket.on('updateLiveUsers', (liveList) => {
-//       setLiveUsers(liveList || []);
-//     });
-
-//     // New registration
-//     socket.on('userRegistered', (newUser) => {
-//       setAllUsers(prev => {
-//         if (!prev.some(u => u._id === newUser._id)) return [...prev, newUser];
-//         return prev;
-//       });
-//     });
-
-//     // User logged in
-//     socket.on('userLoggedIn', (user) => {
-//       setLiveUsers(prev => {
-//         if (!prev.some(u => u.email === user.email)) return [...prev, user];
-//         return prev;
-//       });
-//       setAllUsers(prev => {
-//         if (!prev.some(u => u.email === user.email)) return [...prev, user];
-//         return prev;
-//       });
-//     });
-
-//     // User logged out
-//     socket.on('userLoggedOut', (loggedOutUser) => {
-//       setLiveUsers(prev => prev.filter(u => u._id !== loggedOutUser._id));
-//     });
-
-//     return () => socket.disconnect();
-//   }, [currentUser]);
-
-//   const isUserLive = email =>
-//     liveUsers.some(u => u.email === email);
-
-//   const handleLogout = () => {
-//     if (socketRef.current) {
-//       socketRef.current.disconnect(); // disconnect only this tab
-//     }
-//     sessionStorage.removeItem('currentUser'); // changed to sessionStorage
-//     setCurrentUser(null);
-//   };
-
-//   if (!currentUser) return <div>User logged out</div>;
-
-//   return (
-//     <div>
-//       <h2>User List</h2>
-//       <button onClick={handleLogout}>Logout</button>
-
-//       <table>
-//         <thead>
-//           <tr><th>Name</th><th>Email</th><th>Status</th></tr>
-//         </thead>
-//         <tbody>
-//           {allUsers.map(user => (
-//             <tr key={user._id}>
-//               <td>{user.name || `${user.firstName} ${user.lastName}`}</td>
-//               <td>{user.email}</td>
-//               <td>{isUserLive(user.email) ? 'Online' : 'Offline'}</td>
-//             </tr>
-//           ))}
-//         </tbody>
-//       </table>
-//     </div>
-//   );
-// };
-
-// export default UserList;
 
 
 
@@ -126,6 +8,7 @@ const UserList = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [allUsers, setAllUsers] = useState([]);
   const [liveUsers, setLiveUsers] = useState([]);
+    const [popupUser, setPopupUser] = useState(null);
   const socketRef = useRef(null);
 
   // Load current user (from sessionStorage)
@@ -172,13 +55,11 @@ const UserList = () => {
   }
 });
 
-
-    // Live users update
     socket.on("updateLiveUsers", (liveList) => {
       setLiveUsers(liveList || []);
     });
 
-    // New registration
+ 
         socket.on("userRegistered", (newUser) => {
       setAllUsers((prev) => {
         const exists = prev.some((u) => u.email === newUser.email);
@@ -187,8 +68,6 @@ const UserList = () => {
       });
     });
 
-
-    // User logged in
     socket.on("userLoggedIn", (user) => {
   setAllUsers((prev) => {
     const exists = prev.some((u) => u.email === user.email);
@@ -204,7 +83,7 @@ const UserList = () => {
     });
 
 
-    // User logged out
+    
     socket.on("userLoggedOut", (loggedOutUser) => {
       setLiveUsers((prev) => prev.filter((u) => u.email !== loggedOutUser.email));
     });
@@ -217,11 +96,15 @@ const UserList = () => {
 
   const handleLogout = () => {
     if (socketRef.current) {
-      socketRef.current.disconnect(); // disconnect only this tab
+      socketRef.current.disconnect(); 
     }
     sessionStorage.removeItem("currentUser");
     setCurrentUser(null);
   };
+    const handleUserClick = user => {
+    setPopupUser(user);
+  };
+  const closePopup = () => setPopupUser(null);
 
   if (!currentUser) return <div>User logged out</div>;
  const getUserName = (user) => {
@@ -241,7 +124,7 @@ const UserList = () => {
         </thead>
         <tbody>
           {allUsers.map((user) => (
-            <tr key={user.email}>
+<tr key={user.email} onClick={() => handleUserClick(user)} className="user-row">
               <td>{getUserName(user)}</td>
               <td>{user.email}</td>
               <td>{isUserLive(user.email) ? "Online" : "Offline"}</td>
@@ -249,6 +132,20 @@ const UserList = () => {
           ))}
         </tbody>
       </table>
+      {popupUser && (
+        <div className="popup-overlay" onClick={closePopup}>
+          <div className="popup-content" onClick={e => e.stopPropagation()}>
+            <h3>User Info</h3>
+            <p><b>Name:</b> {popupUser.firstName} {popupUser.lastName}</p>
+            <p><b>Email:</b> {popupUser.email}</p>
+            <p><b>Mobile:</b> {popupUser.mobile}</p>
+            <p><b>Address:</b> {popupUser.address?.street}, {popupUser.address?.city}, {popupUser.address?.state}, {popupUser.address?.country}</p>
+            <p><b>Login ID:</b> {popupUser.loginId}</p>
+            <p><b>Created At:</b> {popupUser.creationTime ? new Date(popupUser.creationTime).toLocaleString() : ''}</p>
+            <button className="popup-close-btn" onClick={closePopup}>Close</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
