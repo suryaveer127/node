@@ -188,17 +188,19 @@ const UserList = () => {
 
     // User logged in
     socket.on("userLoggedIn", (user) => {
-      setLiveUsers((prev) => {
-        if (!prev.some((u) => u._id === user._id)) return [...prev, user];
-        return prev;
-      });
+  setAllUsers((prev) => {
+    const exists = prev.some((u) => u._id === user._id);
+    if (!exists) return [...prev, user];
+    return prev.map((u) => (u._id === user._id ? { ...u, ...user } : u));
+  });
 
-      setAllUsers((prev) => {
-        const exists = prev.some((u) => u._id === user._id);
-        if (!exists) return [...prev, user];
-        return prev.map((u) => (u._id === user._id ? { ...u, ...user } : u));
-      });
-    });
+  setLiveUsers((prev) => {
+    const exists = prev.some((u) => u._id === user._id);
+    if (!exists) return [...prev, user];
+    return prev.map((u) => (u._id === user._id ? { ...u, ...user } : u));
+  });
+});
+
 
     // User logged out
     socket.on("userLoggedOut", (loggedOutUser) => {
