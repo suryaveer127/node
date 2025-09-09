@@ -66,13 +66,7 @@ const UserList = () => {
     });
 
     
-    socket.on('userLoggedIn', (loggedInUser) => {
-      setLiveUsers((prev) => {
-        const exists = prev.find(u => u.email === loggedInUser.email);
-        if (exists) return prev;
-        return [...prev, loggedInUser];
-      });
-    });
+    
     window.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => {

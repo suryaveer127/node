@@ -100,12 +100,7 @@ exports.login = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ error: 'Invalid Email or Password' });
     }
-      if (req.io) {
-      req.io.emit("userLoggedIn", {
-        email: user.email,
-        name: `${user.firstName} ${user.lastName}`,
-      });
-    }
+    
     res.json({
       id: user._id,
       email: user.email,

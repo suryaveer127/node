@@ -34,10 +34,9 @@ const AdminPanel = () => {
         setLiveUsers([]);
       }
     });
+    
 
-    socket.on('userLogout', (userEmail) => {
-      setLiveUsers(prev => prev.filter(u => u.email !== userEmail));
-    });
+    
         socket.on('userRegistered', (newUser) => {
       setAllUsers((prev) => [...prev, newUser]);
     });
