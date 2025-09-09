@@ -93,8 +93,8 @@ exports.registration = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    const data = req.body;
-    const user = await User.findOne({ data });
+    const { email, password} = req.body;
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ error: 'Invalid Email or Password' });
     }
@@ -104,7 +104,7 @@ exports.login = async (req, res) => {
       return res.status(400).json({ error: 'Invalid Email or Password' });
     }
     
-    
+    console.log('Login successful for:', email);
     if (req.io) {
     req.io.emit('userLoggedIn', {
      
