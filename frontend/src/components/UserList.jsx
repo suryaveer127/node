@@ -47,13 +47,14 @@ const UserList = () => {
       });
     });
 
-    socket.on('updateLiveUsers', liveList => {
-      if (Array.isArray(liveList)) {
-        setLiveUsers(liveList.filter(u => u && typeof u.email === 'string'));
-      } else {
-        setLiveUsers([]);
-      }
-    });
+    socket.on('updateLiveUsers', (liveList) => {
+    console.log('updateLiveUsers event received:', liveList);
+    setLiveUsers(liveList || []);
+  });
+  socket.on('userLoggedIn', (user) => {
+    console.log('User logged in:', user);
+    // Optional: show toast or log login event
+  });
 
     const handleBeforeUnload = () => {
       if (socketRef.current && currentUser) {

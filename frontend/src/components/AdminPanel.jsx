@@ -35,14 +35,15 @@ const AdminPanel = () => {
       }
     });
 
-    
-
-    
+  
         socket.on('userRegistered', (newUser) => {
       setAllUsers((prev) => [...prev, newUser]);
     });
 
-   
+   socket.on('userLoggedIn', (user) => {
+    console.log('User logged in:', user);
+    // Optional: show toast or log login event
+  });
 
     return () => {
       socket.disconnect();
