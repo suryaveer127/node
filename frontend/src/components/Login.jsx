@@ -3,13 +3,13 @@ import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const navigate = useNavigate();
- 
 
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e) =>
+    setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const validate = () => {
     if (!formData.email.trim()) return 'Login ID is required';
@@ -27,20 +27,23 @@ const Login = () => {
 
     setLoading(true);
     setError('');
-   console.log('Sending login data:', formData);
+    console.log('Sending login data:', formData);
     try {
-      const response = await fetch(`https://not-4adl.onrender.com/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        `https://not-4adl.onrender.com/api/auth/login`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        }
+      );
       const data = await response.json();
 
       if (response.ok) {
-       
-localStorage.setItem('currentUser', JSON.stringify(data));
+        // ✅ store in sessionStorage instead of localStorage
+        sessionStorage.setItem('currentUser', JSON.stringify(data));
 
-        // Navigate to UserList page passing userId without socket
+        // Navigate to UserList page
         navigate('/users');
       } else {
         setError(data.error || 'Login failed');
@@ -60,7 +63,7 @@ localStorage.setItem('currentUser', JSON.stringify(data));
         <input
           className="form-input"
           name="email"
-          placeholder="email"
+          placeholder="Email"
           value={formData.email}
           onChange={handleChange}
           disabled={loading}
@@ -79,13 +82,13 @@ localStorage.setItem('currentUser', JSON.stringify(data));
         </button>
       </form>
       <div className="form-footer">
-        Don't have an account? <a className="form-link" href="/signup">Register</a>
+        Don't have an account?{' '}
+        <a className="form-link" href="/signup">
+          Register
+        </a>
       </div>
     </div>
   );
 };
 
 export default Login;
-
-
-

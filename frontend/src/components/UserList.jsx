@@ -8,14 +8,14 @@ const UserList = () => {
   const [popupUser, setPopupUser] = useState(null);
   const socketRef = useRef(null);
 
-  // Load current user
+  // Load current user (from sessionStorage now)
   useEffect(() => {
-    const storedUser = localStorage.getItem('currentUser');
+    const storedUser = sessionStorage.getItem('currentUser');
     if (storedUser && storedUser !== 'undefined') {
       try {
         setCurrentUser(JSON.parse(storedUser));
       } catch {
-        localStorage.removeItem('currentUser');
+        sessionStorage.removeItem('currentUser');
       }
     }
   }, []);
@@ -72,13 +72,9 @@ const UserList = () => {
     });
 
     // User logged out
-   socket.on('userLoggedOut', (loggedOutUser) => {
-  setLiveUsers(prev => prev.filter(u => u._id !== loggedOutUser._id));
-});
- socket.on('userLoggedOut', (loggedOutUser) => {
-      setLiveUsers((prev) => prev.filter((u) => u._id !== loggedOutUser._id));
+    socket.on('userLoggedOut', (loggedOutUser) => {
+      setLiveUsers(prev => prev.filter(u => u._id !== loggedOutUser._id));
     });
-
 
     return () => socket.disconnect();
   }, [currentUser]);
@@ -87,12 +83,12 @@ const UserList = () => {
     liveUsers.some(u => u.email === email);
 
   const handleLogout = () => {
-  if (socketRef.current) {
-    socketRef.current.disconnect(); // disconnect only this tab
-  }
-  localStorage.removeItem('currentUser');
-  setCurrentUser(null);
-};
+    if (socketRef.current) {
+      socketRef.current.disconnect(); // disconnect only this tab
+    }
+    sessionStorage.removeItem('currentUser'); // changed to sessionStorage
+    setCurrentUser(null);
+  };
 
   if (!currentUser) return <div>User logged out</div>;
 
@@ -120,5 +116,3 @@ const UserList = () => {
 };
 
 export default UserList;
-
-
