@@ -147,7 +147,7 @@ const Signup = () => {
       if (response.ok) {
         setSuccessMessage('Registration successful! Please Login');
 
-        // ✅ clear form & OTP states after success
+       
         setFormData({
           firstName: '',
           lastName: '',

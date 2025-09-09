@@ -34,14 +34,7 @@ const AdminPanel = () => {
         setLiveUsers([]);
       }
     });
-    socket.on('userLoggedIn', (loggedInUser) => {
-    setLiveUsers(prev => {
-      if (prev.some(u => u.email === loggedInUser.email)) {
-        return prev;
-      }
-      return [...prev, loggedInUser];
-    });
-  });
+
     
 
     
@@ -49,14 +42,7 @@ const AdminPanel = () => {
       setAllUsers((prev) => [...prev, newUser]);
     });
 
-    
-    socket.on('userLoggedIn', (loggedInUser) => {
-      setLiveUsers((prev) => {
-        const exists = prev.find(u => u.email === loggedInUser.email);
-        if (exists) return prev;
-        return [...prev, loggedInUser];
-      });
-    });
+   
 
     return () => {
       socket.disconnect();
