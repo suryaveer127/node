@@ -1,6 +1,6 @@
 const otpGenerator = require('otp-generator');
 const redisClient = require('../utils/redisClient');
-
+const sendMail = require('../utils/mailer');
 exports.sendOtp = async (req, res) => {
  
   try {
