@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 
 const Signup = () => {
-  const navigate = useNavigate();
-
+  
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -21,12 +20,13 @@ const Signup = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [otpEmail, setOtpEmail] = useState('');
   const [otpMobile, setOtpMobile] = useState('');
-  const [generatedOtpEmail, setGeneratedOtpEmail] = useState('');
+   const [generatedOtpEmail, setGeneratedOtpEmail] = useState('');
   const [generatedOtpMobile, setGeneratedOtpMobile] = useState('');
   const [verifiedEmail, setVerifiedEmail] = useState(false);
   const [verifiedMobile, setVerifiedMobile] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
@@ -89,16 +89,19 @@ const Signup = () => {
           body: JSON.stringify({ contact: formData.mobile, type: 'mobile' }),
         }),
       ]);
-      const emailData = await emailRes.json();
+      
+     const emailData = await emailRes.json();
       const mobileData = await mobileRes.json();
 
-      if (emailRes.ok && mobileRes.ok) {
+      if (mobileRes.ok) {
+        
         setGeneratedOtpEmail(emailData.otp || '');
         setGeneratedOtpMobile(mobileData.otp || '');
+        
         setOtpSent(true);
 
        
-        console.log('Generated Email OTP:', emailData.otp);
+       
         console.log('Generated Mobile OTP:', mobileData.otp);
       } else {
         setError('Failed to send OTPs');
@@ -148,8 +151,7 @@ const Signup = () => {
       });
       const data = await response.json();
       if (response.ok) {
-        alert('Registration successful');
-        navigate('/login');
+       setSuccessMessage('Registration successful!Please Login');
       } else {
         setError(data.error || 'Registration failed');
       }
@@ -198,7 +200,7 @@ const Signup = () => {
             <button onClick={() => verifyOtp('email')} disabled={verifiedEmail || loading || !otpEmail.trim()}>
               {verifiedEmail ? 'Verified' : 'Verify Email OTP'}
             </button>
-            {generatedOtpEmail && <p style={{ color: 'blue' }}>Generated OTP: {generatedOtpEmail}</p>}
+           
           </div>
           <div>
             <input
@@ -217,7 +219,10 @@ const Signup = () => {
             <button onClick={finalizeRegistration} disabled={loading}>
               {loading ? 'Registering...' : ' Register'}
             </button>
+            
           )}
+          {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
+ 
         </div>
       )}
 

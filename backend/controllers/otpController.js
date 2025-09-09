@@ -1,7 +1,6 @@
 const otpGenerator = require('otp-generator');
 const redisClient = require('../utils/redisClient');
 
-
 exports.sendOtp = async (req, res) => {
  
   try {
@@ -12,8 +11,12 @@ exports.sendOtp = async (req, res) => {
 
     const otp = otpGenerator.generate(6, { digits: true, alphabets: false, upperCase: false, specialChars: false });
     await redisClient.setEx(`${type}:${contact}`, 600, otp);
-   
-    console.log(`OTP for ${type} (${contact}):`, otp);
+
+    if (type === 'email') {
+      await sendMail(contact, "Your OTP Code", `Your OTP code is: ${otp}`);
+    }
+  
+    
     res.json({ message: `OTP sent to your ${type}`, otp });
 
   } catch (err) {
