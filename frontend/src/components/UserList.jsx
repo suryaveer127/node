@@ -163,13 +163,15 @@ const UserList = () => {
     socketRef.current = socket;
 
     socket.on("connect", () => {
-      if (currentUser) {
-        socket.emit("joinLive", {
-          _id: currentUser._id,
-          email: currentUser.email,
-        });
-      }
+  if (currentUser) {
+    const userInfo = currentUser.user || currentUser; // handles both shapes
+    socket.emit("joinLive", {
+      _id: userInfo._id,
+      email: userInfo.email,
     });
+  }
+});
+
 
     // Live users update
     socket.on("updateLiveUsers", (liveList) => {
