@@ -123,6 +123,26 @@ exports.login = async (req, res) => {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Server error' });
   }
+
+  // POST /api/auth/logout
+router.post('/logout', (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'Email required' });
+
+  // Remove the user from liveUsers map
+  const socketEntry = Array.from(liveUsers.entries()).find(([_, user]) => user.email === email);
+  if (socketEntry) {
+    const [socketId] = socketEntry;
+    liveUsers.delete(socketId);
+
+    // Broadcast updated live users
+    req.io.to("live_users").emit("updateLiveUsers", Array.from(liveUsers.values()));
+    req.io.to("admin_room").emit("updateLiveUsers", Array.from(liveUsers.values()));
+  }
+
+  return res.json({ success: true });
+});
+
 };
 
 exports.getAllUsers = async (req, res) => {

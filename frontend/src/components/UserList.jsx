@@ -75,6 +75,9 @@ const UserList = () => {
    socket.on('userLoggedOut', (loggedOutUser) => {
   setLiveUsers(prev => prev.filter(u => u._id !== loggedOutUser._id));
 });
+ socket.on('userLoggedOut', (loggedOutUser) => {
+      setLiveUsers((prev) => prev.filter((u) => u._id !== loggedOutUser._id));
+    });
 
 
     return () => socket.disconnect();
@@ -117,3 +120,5 @@ const UserList = () => {
 };
 
 export default UserList;
+
+

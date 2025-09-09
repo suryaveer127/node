@@ -15,17 +15,17 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: '*' } 
 });
-
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
 app.use(cors());
 app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/otp', otpRoutes);
 
 // Add io to req if needed in routes
-app.use((req, res, next) => {
-  req.io = io;
-  next();
-});
+
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
@@ -61,19 +61,14 @@ io.on('connection', (socket) => {
     socket.emit("updateLiveUsers", Array.from(liveUsers.values()));
   });
 
-  // Disconnect
-socket.on("disconnect", () => {
-  const disconnectedUser = liveUsers.get(socket.id);
+ socket.on("disconnect", () => {
+  console.log('User disconnected:', socket.id);
   liveUsers.delete(socket.id);
 
-  // Update live users for everyone in "live_users" room
   io.to("live_users").emit("updateLiveUsers", Array.from(liveUsers.values()));
+  io.to("admin_room").emit("updateLiveUsers", Array.from(liveUsers.values()));
 
-  // Notify other users that this specific user logged out
-  // Use a broadcast so the user themselves doesn't receive it
-  if (disconnectedUser) {
-    socket.broadcast.to("live_users").emit("userLoggedOut", disconnectedUser);
-  }
+  io.emit("userLoggedOut", { socketId: socket.id });
 });
 
 });
