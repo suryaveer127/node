@@ -149,7 +149,7 @@ const finalizeRegistration = async () => {
     const data = await response.json();
 
     if (response.ok) {
-      setSuccessMessage('Registration successful! Logging in...');
+      setSuccessMessage('Registration successful!');
 
       // Automatically login user
       const loginResponse = await fetch('https://not-4adl.onrender.com/api/auth/login', {
@@ -160,15 +160,15 @@ const finalizeRegistration = async () => {
       const loginData = await loginResponse.json();
 
       if (loginResponse.ok) {
-        localStorage.setItem('currentUser', JSON.stringify(loginData));
+        sessionStorage.setItem("currentUser", JSON.stringify(loginData));
         // Reset registration form and states
          const newUserData = {
     email: formData.email,
     token: loginData.token,
     userInfo: loginData
   };
-  localStorage.setItem('newUserRegistered', JSON.stringify(newUserData));
-  localStorage.removeItem('newUserRegistered');
+   sessionStorage.setItem("newUserRegistered", JSON.stringify(loginData));
+  sessionStorage.removeItem("newUserRegistered");
         setFormData({
           firstName: '',
           lastName: '',
