@@ -8,20 +8,19 @@ const UserList = () => {
   const [popupUser, setPopupUser] = useState(null);
   const socketRef = useRef(null);
 
-  // Load current user from localStorage
+  // Load current user
   useEffect(() => {
     const storedUser = localStorage.getItem('currentUser');
     if (storedUser && storedUser !== 'undefined') {
       try {
         setCurrentUser(JSON.parse(storedUser));
-      } catch (e) {
-        console.error('Failed to parse currentUser from localStorage:', e);
+      } catch {
         localStorage.removeItem('currentUser');
       }
     }
   }, []);
 
-  // Fetch initial users list
+  // Fetch initial users
   const fetchUsers = async () => {
     try {
       const res = await fetch('https://not-4adl.onrender.com/api/auth/users');
@@ -36,7 +35,7 @@ const UserList = () => {
     fetchUsers();
   }, []);
 
-  // Setup socket connection
+  // Socket connection
   useEffect(() => {
     if (!currentUser) return;
 
@@ -44,59 +43,44 @@ const UserList = () => {
     socketRef.current = socket;
 
     socket.on('connect', () => {
-      console.log('Socket connected:', socket.id);
-      socket.emit('joinLive', {
-        email: currentUser.email,
-        name: `${currentUser.firstName} ${currentUser.lastName}`,
-      });
+      socket.emit('joinLive', currentUser);
     });
 
-    // Update live users list
+    // Live status
     socket.on('updateLiveUsers', (liveList) => {
       setLiveUsers(liveList || []);
     });
 
-    // Add new registered user to list
+    // New registration
     socket.on('userRegistered', (newUser) => {
       setAllUsers(prev => {
-        if (prev.some(u => u._id === newUser._id)) return prev;
-        return [...prev, newUser];
+        if (!prev.some(u => u._id === newUser._id)) return [...prev, newUser];
+        return prev;
       });
     });
 
-    // Optional: handle user updates
-    socket.on('userUpdated', (updatedUser) => {
-      setAllUsers(prev =>
-        prev.map(u => (u._id === updatedUser._id ? updatedUser : u))
-      );
+    // User logged in
+    socket.on('userLoggedIn', (user) => {
+      setLiveUsers(prev => {
+        if (!prev.some(u => u.email === user.email)) return [...prev, user];
+        return prev;
+      });
+      setAllUsers(prev => {
+        if (!prev.some(u => u.email === user.email)) return [...prev, user];
+        return prev;
+      });
     });
 
-    // Cleanup on page unload
-    const handleBeforeUnload = () => {
-      if (socketRef.current && currentUser) {
-        socketRef.current.emit('logoutUser', { email: currentUser.email });
-        socketRef.current.disconnect();
-      }
-    };
+    // User logged out
+    socket.on('userLoggedOut', (user) => {
+      setLiveUsers(prev => prev.filter(u => u.email !== user.email));
+    });
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      socket.disconnect();
-      socketRef.current = null;
-    };
+    return () => socket.disconnect();
   }, [currentUser]);
 
-  // Helpers
-  const emailMatch = (a, b) =>
-    (a || '').trim().toLowerCase() === (b || '').trim().toLowerCase();
-
   const isUserLive = email =>
-    liveUsers.some(lu => lu && emailMatch(lu.email, email));
-
-  const handleUserClick = user => setPopupUser(user);
-  const closePopup = () => setPopupUser(null);
+    liveUsers.some(u => u.email === email);
 
   const handleLogout = () => {
     if (socketRef.current && currentUser) {
@@ -107,55 +91,27 @@ const UserList = () => {
     setCurrentUser(null);
   };
 
-  if (!currentUser) {
-    return <div>User is logged out. Please login again.</div>;
-  }
+  if (!currentUser) return <div>User logged out</div>;
 
   return (
-    <div className="userlist-container">
+    <div>
       <h2>User List</h2>
       <button onClick={handleLogout}>Logout</button>
 
-      <table className="userlist-table">
+      <table>
         <thead>
-          <tr>
-            <th>Name</th><th>Email</th><th>Status</th>
-          </tr>
+          <tr><th>Name</th><th>Email</th><th>Status</th></tr>
         </thead>
         <tbody>
-          {allUsers.length === 0 ? (
-            <tr>
-              <td colSpan="3">No users registered</td>
+          {allUsers.map(user => (
+            <tr key={user._id}>
+              <td>{user.name || `${user.firstName} ${user.lastName}`}</td>
+              <td>{user.email}</td>
+              <td>{isUserLive(user.email) ? 'Online' : 'Offline'}</td>
             </tr>
-          ) : allUsers.map(user => {
-              const online = isUserLive(user.email);
-              return (
-                <tr key={user._id} onClick={() => handleUserClick(user)}>
-                  <td>{user.firstName} {user.lastName}</td>
-                  <td>{user.email}</td>
-                  <td className={online ? 'status-online' : 'status-offline'}>
-                    {online ? 'Online' : 'Offline'}
-                  </td>
-                </tr>
-              );
-            })}
+          ))}
         </tbody>
       </table>
-
-      {popupUser && (
-        <div className="popup-overlay" onClick={closePopup}>
-          <div className="popup-content" onClick={e => e.stopPropagation()}>
-            <h3>User Info</h3>
-            <p><b>Name:</b> {popupUser.firstName} {popupUser.lastName}</p>
-            <p><b>Email:</b> {popupUser.email}</p>
-            <p><b>Mobile:</b> {popupUser.mobile}</p>
-            <p><b>Address:</b> {popupUser.address?.street}, {popupUser.address?.city}, {popupUser.address?.state}, {popupUser.address?.country}</p>
-            <p><b>Login ID:</b> {popupUser.loginId}</p>
-            <p><b>Created At:</b> {popupUser.creationTime ? new Date(popupUser.creationTime).toLocaleString() : ''}</p>
-            <button onClick={closePopup}>Close</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
