@@ -38,7 +38,7 @@ const Login = () => {
 
       if (response.ok) {
        
-localStorage.setItem('currentUser', JSON.stringify(data.user));
+localStorage.setItem('currentUser', JSON.stringify(data));
 
         // Navigate to UserList page passing userId without socket
         navigate('/users');
