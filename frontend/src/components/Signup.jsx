@@ -297,25 +297,16 @@ const Signup = () => {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Load users from localStorage or start empty
+  // Store multiple users in localStorage (array of users)
   const [users, setUsers] = useState(() => {
     const saved = localStorage.getItem('multiUsers');
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [activeUserEmail, setActiveUserEmail] = useState(() => {
-    return localStorage.getItem('activeUserEmail') || null;
-  });
-
-  // Keep localStorage in sync with users and active user email
+  // Sync users to localStorage when changed
   useEffect(() => {
     localStorage.setItem('multiUsers', JSON.stringify(users));
-    if (activeUserEmail) {
-      localStorage.setItem('activeUserEmail', activeUserEmail);
-    }
-  }, [users, activeUserEmail]);
-
-  const activeUser = users.find((u) => u.email === activeUserEmail);
+  }, [users]);
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
@@ -449,13 +440,13 @@ const Signup = () => {
         const loginData = await loginResponse.json();
 
         if (loginResponse.ok) {
-          // Add or update user inside users in localStorage
+          // Add or update user in multiUsers in localStorage but no UI for switching shown
           setUsers((prevUsers) => {
             const filtered = prevUsers.filter((u) => u.email !== formData.email);
             return [...filtered, { email: formData.email, token: loginData.token, userInfo: loginData }];
           });
-          setActiveUserEmail(formData.email);
 
+          // Reset form and OTP related states
           setFormData({
             firstName: '',
             lastName: '',
@@ -475,6 +466,7 @@ const Signup = () => {
           setVerifiedEmail(false);
           setVerifiedMobile(false);
 
+          // Navigate to user list directly
           navigate('/users');
         } else {
           setError(loginData.error || 'Auto-login failed, please login manually.');
@@ -489,34 +481,12 @@ const Signup = () => {
     }
   };
 
-  const switchUser = (email) => {
-    setActiveUserEmail(email);
-    navigate('/users');
-  };
-
-  const renderUserSwitcher = () => (
-    <div>
-      <h4>Switch Active User</h4>
-      {users.map((user) => (
-        <button
-          key={user.email}
-          disabled={user.email === activeUserEmail}
-          onClick={() => switchUser(user.email)}
-        >
-          {user.email} {user.email === activeUserEmail ? '(Active)' : ''}
-        </button>
-      ))}
-    </div>
-  );
-
   const bothVerified = verifiedEmail && verifiedMobile;
 
   return (
     <div className="form-container">
       <h2>Sign Up</h2>
       {error && <p style={{ color: 'red' }}>{error}</p>}
-
-      {renderUserSwitcher()}
 
       <input name="firstName" placeholder="First Name" value={formData.firstName} onChange={handleChange} disabled={otpSent} />
       <input name="lastName" placeholder="Last Name" value={formData.lastName} onChange={handleChange} disabled={otpSent} />

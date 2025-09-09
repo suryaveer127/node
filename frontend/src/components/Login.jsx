@@ -131,7 +131,6 @@ const Login = () => {
     setLoading(true);
     setError('');
     try {
-      console.log('Sending login data:', formData);
       const response = await fetch(`https://not-4adl.onrender.com/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -140,13 +139,14 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Add or update current user inside users array
+        // Add or update current user inside users array (no UI for switching)
         setUsers((prevUsers) => {
           const filtered = prevUsers.filter(u => u.email !== formData.email);
           return [...filtered, { email: formData.email, token: data.token, userInfo: data }];
         });
         setActiveUserEmail(formData.email);
 
+        // Navigate to UserList page immediately
         navigate('/users');
       } else {
         setError(data.error || 'Login failed');
@@ -158,32 +158,10 @@ const Login = () => {
     }
   };
 
-  // Optional UI to switch active user (you can build a separate component)
-  const switchUser = (email) => {
-    setActiveUserEmail(email);
-    navigate('/users');
-  };
-
   return (
     <div className="form-container">
       <h2 className="form-title">Login</h2>
       {error && <p style={{ color: 'red' }}>{error}</p>}
-      
-      {/* Optionally, render user switcher buttons */}
-      {users.length > 1 && (
-        <div>
-          <h4>Switch Active User</h4>
-          {users.map((user) => (
-            <button
-              key={user.email}
-              disabled={user.email === activeUserEmail}
-              onClick={() => switchUser(user.email)}
-            >
-              {user.email} {user.email === activeUserEmail ? '(Active)' : ''}
-            </button>
-          ))}
-        </div>
-      )}
 
       <form onSubmit={handleSubmit} autoComplete="off">
         <input
