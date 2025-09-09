@@ -164,10 +164,10 @@ const UserList = () => {
 
     socket.on("connect", () => {
   if (currentUser) {
-    const userInfo = currentUser.user || currentUser; // handles both shapes
+    const userInfo = currentUser.user || currentUser ; // handles both shapes
     socket.emit("joinLive", {
-      _id: userInfo._id,
-      email: userInfo.email,
+      email: currentUser.email,
+      name: `${currentUser.firstName} ${currentUser.lastName}`,
     });
   }
 });
@@ -181,9 +181,9 @@ const UserList = () => {
     // New registration
         socket.on("userRegistered", (newUser) => {
       setAllUsers((prev) => {
-        const exists = prev.some((u) => u._id === newUser._id);
+        const exists = prev.some((u) => u.email === newUser.email);
         if (!exists) return [...prev, newUser];
-        return prev.map((u) => (u._id === newUser._id ? { ...u, ...newUser } : u));
+        return prev.map((u) => (u.email === newUser.email? { ...u, ...newUser } : u));
       });
     });
 
@@ -191,22 +191,22 @@ const UserList = () => {
     // User logged in
     socket.on("userLoggedIn", (user) => {
   setAllUsers((prev) => {
-    const exists = prev.some((u) => u._id === user._id);
+    const exists = prev.some((u) => u.email === user.email);
     if (!exists) return [...prev, user];
-    return prev.map((u) => (u._id === user._id ? { ...u, ...user } : u));
+    return prev.map((u) => (u.email=== user.email? { ...u, ...user } : u));
   });
 
     setLiveUsers((prev) => {
-        const exists = prev.some((u) => u._id === user._id);
+        const exists = prev.some((u) => u.email=== user.email);
         if (!exists) return [...prev, user];
-        return prev.map((u) => (u._id === user._id ? { ...u, ...user } : u));
+        return prev.map((u) => (u.email === user.email ? { ...u, ...user } : u));
       });
     });
 
 
     // User logged out
     socket.on("userLoggedOut", (loggedOutUser) => {
-      setLiveUsers((prev) => prev.filter((u) => u._id !== loggedOutUser._id));
+      setLiveUsers((prev) => prev.filter((u) => u.email !== loggedOutUser.email));
     });
 
     return () => socket.disconnect();
